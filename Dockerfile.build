@@ -1,0 +1,27 @@
+FROM msaraiva/elixir-dev
+MAINTAINER DrPandemic
+
+ENV REFRESHED_AT 2017-01-27
+ENV HOME /root
+
+# Upgrade all packages and install needed packages
+RUN apk --update upgrade && \
+  apk add docker erlang-xmerl && \
+  rm -rf /var/cache/apk/*
+
+COPY . /build
+
+ARG APP
+ENV MIX_ENV prod
+
+WORKDIR /build
+
+RUN mix local.hex
+RUN mix deps.get --only prod
+RUN mix compile
+RUN echo y | mix release.clean --implode
+RUN mix release --env=prod
+
+WORKDIR /build
+
+CMD ["/bin/sh"]
