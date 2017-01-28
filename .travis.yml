@@ -1,0 +1,6 @@
+language: elixir
+elixir:
+  - 1.4
+
+notifications:
+  email: false
