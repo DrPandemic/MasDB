@@ -3,7 +3,9 @@ defmodule Masdb.CLI do
   @default_file "./data.db"
 
   def run(argv) do
-    parse_args(argv)
+    argv
+    |> parse_args
+    |> process
   end
 
   @doc """
@@ -17,7 +19,7 @@ defmodule Masdb.CLI do
 
   It can be `client --join=host:port` to open a MasDB shell on a cluster.
 
-  Return a tuple of `{:help}`, `{:start, filename, port, {host, port}}` or `{:client, join}`.
+  Return a tuple of `:help`, `{:start, filename, port, {host, port}}` or `{:client, join}`.
   """
   def parse_args(argv) do
     parse = OptionParser.parse(argv,
@@ -27,7 +29,7 @@ defmodule Masdb.CLI do
 
     case parse do
       {[help: true], _, _}
-        -> {:help}
+        -> :help
 
       {argv, ["start"], _}
         -> parse_start(argv)
@@ -35,7 +37,7 @@ defmodule Masdb.CLI do
       {argv, ["client"], _}
         -> parse_client(argv)
 
-      _ -> {:help}
+      _ -> :help
     end
   end
 
@@ -63,9 +65,30 @@ defmodule Masdb.CLI do
   defp parse_client(argv) do
     case parse_join(argv) do
       nil
-        -> {:help}
+        -> :help
       host
         -> {:client, host}
     end
+  end
+
+  def process(:help) do
+    IO.puts("""
+    MasDB 0.1.0
+    usage: masdb [Types] [Options]
+
+    Types:
+      -h  --help              This message
+      start                   Start a new database node
+      client                  Connect to an already running node and gives the user a query shell
+
+    Start:
+      -f --file=fileName      Set the save path. Default to `./data.db`
+      -p --port=port          Set the listening port. Default to 1042
+      -j --join=host:port     Set the an entry point to a MasDB cluster
+
+    Client:
+      -j --join=host:port     Set the an entry point to a MasDB cluster. This is a mandatory field
+    """)
+    System.halt(0)
   end
 end

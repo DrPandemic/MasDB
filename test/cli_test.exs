@@ -4,8 +4,8 @@ defmodule CliTest do
   import Masdb.CLI, only: [parse_args: 1]
 
   test "-h or --help returns :help" do
-    assert parse_args(["-h"]) == {:help}
-    assert parse_args(["--help"]) == {:help}
+    assert parse_args(["-h"]) == :help
+    assert parse_args(["--help"]) == :help
   end
 
   test "start parses all flags" do
@@ -49,7 +49,7 @@ defmodule CliTest do
       {"localhost", 1042}
     }
 
-    assert parse_args(["something"]) == {:help}
+    assert parse_args(["something"]) == :help
   end
 
   test "client parses all flags" do
@@ -67,8 +67,6 @@ defmodule CliTest do
       {"localhost", 1042}
     }
 
-    assert parse_args(["client"]) == {
-      :help,
-    }
+    assert parse_args(["client"]) == :help
   end
 end
