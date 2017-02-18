@@ -4,67 +4,69 @@ defmodule CliTest do
   import Masdb.CLI, only: [parse_args: 1]
 
   test "-h or --help returns :help" do
-    assert parse_args(["-h"]) == :help
     assert parse_args(["--help"]) == :help
+    assert parse_args(["-h"]) == :help
   end
 
   test "start parses all flags" do
-    assert parse_args(["start", "-f", "something", "-p", "1337", "-j", "localhost:1338"]) == {
+    # Happy path
+    assert parse_args(["start", "-f", "something", "-n", "foo", "--hostname", "bar", "-j", "bar@localhost"]) == {
       :start,
       "something",
-      1337,
-      {"localhost", 1338}
+      "foo@bar",
+      "bar@localhost"
     }
-    assert parse_args(["start", "--file", "something", "--port", "1337", "--join", "localhost:1338"]) == {
+    # Long names
+    assert parse_args(["start", "--file", "something", "--name", "foo", "--hostname", "bar", "--join", "bar@localhost"]) == {
       :start,
       "something",
-      1337,
-      {"localhost", 1338}
+      "foo@bar",
+      "bar@localhost"
     }
 
-    assert parse_args(["start", "-p", "1337", "-j", "localhost:1338"]) == {
+    # No -f, uses default file
+    assert parse_args(["start", "-n", "foo", "--hostname", "bar", "-j", "bar@localhost"]) == {
       :start,
       "./data.db",
-      1337,
-      {"localhost", 1338}
+      "foo@bar",
+      "bar@localhost"
     }
 
-    assert parse_args(["start", "-f", "something", "-j", "localhost:1338"]) == {
+    # No joins
+    assert parse_args(["start", "-f", "something", "-n", "foo"]) == {
       :start,
       "something",
-      1042,
-      {"localhost", 1338}
-    }
-
-    assert parse_args(["start", "-f", "something", "-p", "1337"]) == {
-      :start,
-      "something",
-      1337,
+      "foo@localhost",
       nil
     }
-    assert parse_args(["start", "-f", "something", "-p", "1337", "-j", "localhost"]) == {
+
+    # No --hostname, uses localhost
+    assert parse_args(["start", "-f", "something", "-n", "foo"]) == {
       :start,
       "something",
-      1337,
-      {"localhost", 1042}
+      "foo@localhost",
+      nil
     }
+
+    # Generates a name if no -n
+    assert is_binary(elem(parse_args(["start", "--hostname", "bar"]), 2))
+    assert Regex.match?(~r/.*@bar/, elem(parse_args(["start", "--hostname", "bar"]), 2))
+
+    # Generates a name if no -n no --hostname
+    assert is_binary(elem(parse_args(["start"]), 2))
+    assert Regex.match?(~r/.*@localhost/, elem(parse_args(["start"]), 2))
 
     assert parse_args(["something"]) == :help
   end
 
   test "client parses all flags" do
-    assert parse_args(["client", "-j", "localhost:1338"]) == {
+    assert parse_args(["client", "-j", "foo@localhost"]) == {
       :client,
-      {"localhost", 1338}
+      "foo@localhost"
     }
-    assert parse_args(["client", "--join", "localhost:1338"]) == {
+    assert parse_args(["client", "--join", "foo@localhost"]) == {
       :client,
-      {"localhost", 1338}
-    }
-
-    assert parse_args(["client", "-j", "localhost"]) == {
-      :client,
-      {"localhost", 1042}
+      "foo@localhost"
     }
 
     assert parse_args(["client"]) == :help

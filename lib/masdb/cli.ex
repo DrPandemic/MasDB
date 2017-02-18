@@ -1,6 +1,7 @@
 defmodule Masdb.CLI do
-  @default_port 1042
   @default_file "./data.db"
+  @default_hostname "localhost"
+  @default_name "generated"
 
   def run(argv) do
     argv
@@ -13,62 +14,68 @@ defmodule Masdb.CLI do
 
   It can be `start` followed by
   - `[--file=fileName|-f=fileName]` which represents where the data will be saved. Default to `./data.db`.
-  - `[--port=port|-p=port]` which represents on which port the DB can be contacted. Default to 1042.
-  - `[--join=host:port|-j=host:port]` which represents another MasDB node. By doing this, this node will join the other
+  - `[--name=name|-n=name]` which represents the erlang's node's name. If not specified, it will generate
+     one.
+  - `[--hostname=hostname]` which represents the hostname. If no specified, `localhost` whill be used. Use with the -n
+     flag.
+  - `[--join=name@host|-j=name@host]` which represents another MasDB node. By doing this, this node will join the other
      node's cluster.
 
   It can be `client --join=host:port` to open a MasDB shell on a cluster.
 
-  Return a tuple of `:help`, `{:start, filename, port, {host, port}}` or `{:client, join}`.
+  Return `:help`, `{:start, filename, port, {host, port}}` or `{:client, join}`.
   """
   def parse_args(argv) do
     parse = OptionParser.parse(argv,
-      switches: [help: :boolean, file: :string, port: :integer, join: :string],
-      aliases:  [h: :help, f: :file, p: :port, j: :join]
+      switches: [help: :boolean, file: :string, name: :string, hostname: :string, join: :string],
+      aliases:  [h: :help, f: :file, n: :name, j: :join]
     )
 
     case parse do
       {[help: true], _, _}
         -> :help
-
-      {argv, ["start"], _}
-        -> parse_start(argv)
-
-      {argv, ["client"], _}
-        -> parse_client(argv)
-
+      {argv, [action], _} when is_binary(action)
+        -> parse_action(argv, action)
       _ -> :help
     end
   end
 
-  defp parse_join(argv) do
-    host = Regex.run( ~r/(\w+):?(\d+)?/ , Keyword.get(argv, :join, ""))
-    case host do
-      [_, host, port] when is_binary(host) and is_binary(port)
-        -> {host, elem(Integer.parse(port), 0)}
-      [_, host] when is_binary(host)
-        -> {host, @default_port}
-        nil
-        -> nil
+  defp generate_node_name(name, hostname) do
+    hex = :erlang.monotonic_time() |>
+      :erlang.phash2(2048) |>
+      Integer.to_string(16)
+    "#{name}-#{hex}@#{hostname}"
+  end
+
+  defp parse_hostname(argv) do
+    hostname = Keyword.get(argv, :hostname, @default_hostname)
+    case Keyword.get(argv, :name, nil) do
+      nil
+        -> generate_node_name(@default_name, hostname)
+      name
+        -> "#{name}@#{hostname}"
     end
   end
 
-  defp parse_start(argv) do
+  defp parse_action(argv, "start") do
     {
       :start,
       Keyword.get(argv, :file, @default_file),
-      Keyword.get(argv, :port, @default_port),
-      parse_join(argv)
+      parse_hostname(argv),
+      Keyword.get(argv, :join, nil),
     }
   end
 
-  defp parse_client(argv) do
-    case parse_join(argv) do
-      nil
-        -> :help
-      host
-        -> {:client, host}
+  defp parse_action(argv, "client") do
+    if Keyword.has_key?(argv, :join) do
+      {:client, Keyword.get(argv, :join)}
+    else
+      :help
     end
+  end
+
+  defp parse_action(_, _) do
+    :help
   end
 
   def process(:help) do
@@ -83,7 +90,9 @@ defmodule Masdb.CLI do
 
     Start:
       -f --file=fileName      Set the save path. Default to `./data.db`
-      -p --port=port          Set the listening port. Default to 1042
+      -n --name               Set the erlang's node's name. Is mixed with the hostname to generate a fully qualified
+                                name. If not specified, a name will be generated.
+      --hostname              Set the hostname. If not specified, `localhost` will be used.
       -j --join=host:port     Set the an entry point to a MasDB cluster
 
     Client:
