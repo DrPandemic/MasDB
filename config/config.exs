@@ -8,6 +8,12 @@ use Mix.Config
 # if you want to provide default values for your application for
 # 3rd-party users, it should be done in your "mix.exs" file.
 
+config :masdb,
+  save_file: System.get_env("SAVE_FILE"),
+  node_name: System.get_env("NODE_NAME"),
+  hostname: System.get_env("HOSTNAME"),
+  join_node: System.get_env("JOIN_NODE")
+
 # You can configure for your application as:
 #
 #     config :masdb, key: :value

@@ -15,6 +15,9 @@ defmodule Masdb.Mixfile do
   end
 
   defp deps do
-    [{:distillery, "~> 1.0"}]
+    [
+     {:distillery, "~> 1.0"},
+     {:power_assert, "~> 0.0.8", only: :test}
+    ]
   end
 end
