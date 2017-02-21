@@ -1,11 +1,33 @@
 defmodule Masdb.Node do
-  def start(name) do
-    unless Node.alive?() do
-      {:ok, _} = Node.start(name)
-    end
+  use GenServer
+
+  def start_link do
+    GenServer.start_link(__MODULE__, %{node_name: nil}, name: __MODULE__)
   end
 
-  def connect(name) do
-    true = Node.connect(name)
+  def start(node_name) do
+    GenServer.call(__MODULE__, {:start, node_name})
+  end
+
+  def connect(node_name) do
+    GenServer.call(__MODULE__, {:connect, node_name})
+  end
+
+  def list_connected do
+    GenServer.call(__MODULE__, :list_connected)
+  end
+
+  def handle_call(:list_connected, _, state) do
+    {:reply, Masdb.Node.Connection.list, state}
+  end
+
+  def handle_call({:start, node_name}, _, _) do
+    Masdb.Node.Connection.start(node_name)
+    {:reply, :ok, %{node_name: node_name}}
+  end
+
+  def handle_call({:connect, node_name}, _, state) do
+    Masdb.Node.Connection.connect(node_name)
+    {:reply, :ok, state}
   end
 end
