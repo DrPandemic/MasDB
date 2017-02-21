@@ -12,7 +12,7 @@ config :masdb,
   save_file: System.get_env("SAVE_FILE"),
   node_name: System.get_env("NODE_NAME"),
   hostname: System.get_env("HOSTNAME"),
-  join_node: System.get_env("JOIN_NODE")
+  node_to_join: System.get_env("NODE_TO_JOIN")
 
 # You can configure for your application as:
 #
