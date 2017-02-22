@@ -16,9 +16,9 @@ defmodule EnvsTest do
   test "merges the node_name and hostname" do
     # nn@hn
     # none
-    assert Regex.match?(~r/generated-.*@localhost/, (elem(get_config([]), 1)))
+    assert Regex.match?(~r/generated-.*@127\.0\.0\.1/, (elem(get_config([]), 1)))
     # nn
-    assert Regex.match?(~r/something@localhost/,
+    assert Regex.match?(~r/something@127\.0\.0\.1/,
       (elem(get_config([node_name: "something"]), 1))
     )
     # hn

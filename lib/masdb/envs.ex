@@ -1,6 +1,6 @@
 defmodule Masdb.Envs do
   @default_file "./data.db"
-  @default_hostname "localhost"
+  @default_hostname "127.0.0.1"
   @default_name "generated"
 
   @doc """
