@@ -6,12 +6,6 @@ defmodule Masdb.Node.Connection do
   end
   def start(name) when is_nil(name) do end
 
-  def stop do
-    if Node.alive?() do
-      :ok = Node.stop
-    end
-  end
-
   def list do
     Node.list
   end

@@ -6,20 +6,14 @@ defmodule Masdb.Node do
   end
 
   def init(state) do
-    {_, node_name, node_to_join} = Masdb.Envs.get_config
-
-    Masdb.Node.Connection.start(node_name)
-    Masdb.Node.Connection.connect(node_to_join)
+    Masdb.Node.Connection.start(Application.get_env(:masdb, :"node_name"))
+    Masdb.Node.Connection.connect(Application.get_env(:masdb, :"node_to_join"))
 
     {:ok, state}
   end
 
   def start(node_name) do
     GenServer.call(__MODULE__, {:start, node_name})
-  end
-
-  def stop do
-    GenServer.call(__MODULE__, :stop)
   end
 
   def connect(node_name) do
@@ -37,11 +31,6 @@ defmodule Masdb.Node do
   def handle_call({:start, node_name}, _, _) do
     Masdb.Node.Connection.start(node_name)
     {:reply, :ok, %{node_name: node_name}}
-  end
-
-  def handle_call(:stop, _, _) do
-    Masdb.Node.Connection.stop
-    {:reply, :ok, %{node_name: nil}}
   end
 
   def handle_call({:connect, node_name}, _, state) do
