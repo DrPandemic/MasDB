@@ -4,3 +4,6 @@ elixir:
 
 notifications:
   email: false
+
+before_script:
+  - epmd -daemon
