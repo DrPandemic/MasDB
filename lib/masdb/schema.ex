@@ -5,7 +5,12 @@ defmodule Masdb.Schema.Column do
 end
 
 defmodule Masdb.Schema do
-  @type t :: %Masdb.Schema{name: String.t, columns: list(Masdb.Schema.Column)}
-  @enfore_keys [:name, :columns]
-  defstruct [:name, :columns]
+  # A replication_factor of 0, is considered as `everywhere`
+  @type t :: %Masdb.Schema{
+    name: String.t,
+    columns: list(Masdb.Schema.Column),
+    replication_factor: integer
+  }
+  @enfore_keys [:name, :columns, :replication_factor]
+  defstruct [:name, :columns, :replication_factor]
 end
