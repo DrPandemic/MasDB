@@ -11,6 +11,14 @@ defmodule Masdb.Schema do
     columns: list(Masdb.Schema.Column.t),
     replication_factor: integer
   }
-  @enfore_keys [:name, :columns, :replication_factor]
-  defstruct [:name, :columns, :replication_factor]
+  @enfore_keys [:name, :replication_factor]
+  defstruct [:name, :replication_factor, columns: []]
+
+  def validate(%Masdb.Schema{replication_factor: f}) when f < 0 do
+    :replication_factor_limits
+  end
+
+  def validate(%Masdb.Schema{}) do
+    :ok
+  end
 end
