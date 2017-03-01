@@ -7,7 +7,8 @@ defmodule Masdb.Node.Supervisor do
 
   def init([]) do
     supervise([
-      worker(Masdb.Node, [])
+      worker(Masdb.Node, []),
+      worker(Masdb.Register.Server, [])
     ], strategy: :one_for_one)
   end
 end

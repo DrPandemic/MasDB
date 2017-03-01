@@ -14,7 +14,6 @@ defmodule Masdb.Register.Server do
   end
 
   # private
-
   def handle_call({:add_schema, schema}, _, state) do
     case Masdb.Register.validate_new_schema(state.schemas, schema) do
       :ok -> {:reply, :ok, %Masdb.Register{state | schemas: [schema | state.schemas]}}
