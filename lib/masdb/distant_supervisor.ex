@@ -10,7 +10,6 @@ defmodule Masdb.Node.DistantSupervisor do
     )
   end
 
-
   def get_remote_pid_fn(process) do
     Process.whereis(process)
   end
