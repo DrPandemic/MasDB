@@ -18,19 +18,4 @@ defmodule CommunicationTest do
     assert length(select_quorum([node0, node1, node2])) == 2
     assert length(select_quorum([node0, node1, node2, node3])) == 3
   end
-
-  test "get_process_for_nodes fetches pids" do
-    this = self()
-    baz = fn(node, _) ->
-      Task.async(fn ->
-        send this, node
-        node
-      end)
-    end
-
-    ls = [:foo, :bar]
-    assert get_process_for_nodes(ls, :baz, baz) == ls
-    assert_received :foo
-    assert_received :bar
-  end
 end

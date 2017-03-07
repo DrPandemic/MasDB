@@ -3,18 +3,25 @@ defmodule Masdb.Node.DistantSupervisor do
     Task.Supervisor.start_link(name: Masdb.Node.DistantSupervisor)
   end
 
-  def get_remote_pid_fn(process) do
+  def get_local_pid_fn(process) do
     Process.whereis(process)
   end
 
-  def get_remote_pid(remote, process) do
-    Task.Supervisor.async({Masdb.Node.DistantSupervisor, remote},
-      Masdb.Node.DistantSupervisor, :get_remote_pid_fn, [process])
+  def query_remote_node(nodes, module, fun, opts) do
+    nodes
+    |> Enum.map(&spawn_query(&1, module, fun, opts))
+    |> await_results
   end
 
-  def get_remote_pid_blocking(remote, process) do
-    Task.await(
-      get_remote_pid(remote, process)
-    )
+  defp spawn_query(node, module, fun, opts) do
+    remote_task = Task.Supervisor.async({Masdb.Node.DistantSupervisor, node}, module, fun, opts)
+    remote_task
+  end
+
+  defp await_results([tasks]) do
+    Task.await tasks
+  end
+
+  defp await_result do
   end
 end
