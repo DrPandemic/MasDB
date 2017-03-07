@@ -2,20 +2,35 @@ defmodule CommunicationTest do
   use PowerAssert
   import Masdb.Node.Communication
 
-  test "select_qorum works on small lists" do
+  test "select_quorum works on small lists" do
     assert select_quorum([]) == []
-    pid = :c.pid(0,1,2)
-    assert select_quorum([pid]) == [pid]
+    node = Node.self
+    assert select_quorum([node]) == [node]
   end
 
   test "select_qorum works on normal lists" do
-    pid0 = :c.pid(0,1,0)
-    pid1 = :c.pid(0,1,1)
-    pid2 = :c.pid(0,1,2)
-    pid3 = :c.pid(0,1,3)
+    node0 = Node.self
+    node1 = Node.self
+    node2 = Node.self
+    node3 = Node.self
 
-    assert length(select_quorum([pid0, pid1])) == 2
-    assert length(select_quorum([pid0, pid1, pid2])) == 2
-    assert length(select_quorum([pid0, pid1, pid2, pid3])) == 3
+    assert length(select_quorum([node0, node1])) == 2
+    assert length(select_quorum([node0, node1, node2])) == 2
+    assert length(select_quorum([node0, node1, node2, node3])) == 3
+  end
+
+  test "get_process_for_nodes fetches pids" do
+    this = self()
+    baz = fn(node, _) ->
+      Task.async(fn ->
+        send this, node
+        node
+      end)
+    end
+
+    ls = [:foo, :bar]
+    assert get_process_for_nodes(ls, :baz, baz) == ls
+    assert_received :foo
+    assert_received :bar
   end
 end
