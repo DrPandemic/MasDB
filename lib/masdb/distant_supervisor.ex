@@ -1,5 +1,6 @@
 defmodule Masdb.Node.DistantSupervisor do
   @max_timeout 1_000
+
   def start_link do
     Task.Supervisor.start_link(name: Masdb.Node.DistantSupervisor)
   end
@@ -8,18 +9,23 @@ defmodule Masdb.Node.DistantSupervisor do
     Process.whereis(process)
   end
 
-  def query_remote_node(nodes, module, fun, opts) do
+  def find_task_by_ref(tasks, ref) when is_reference(ref) do
+    Enum.find(tasks, fn t -> elem(t, 1).ref == ref end)
+  end
+
+  def query_remote_node(nodes, module, fun, params, opts \\ []) do
     nodes
-    |> Enum.map(&spawn_query(&1, module, fun, opts))
-    |> await_results
+    |> Enum.map(&spawn_query(&1, module, fun, params))
+    |> await_results(opts)
   end
 
-  defp spawn_query(node, module, fun, opts) do
-    Task.Supervisor.async_nolink({Masdb.Node.DistantSupervisor, node}, module, fun, opts)
+  defp spawn_query(node, module, fun, params) do
+    {node, Task.Supervisor.async_nolink({Masdb.Node.DistantSupervisor, node}, module, fun, params)}
   end
 
-  defp await_results(tasks) do
-    timer = Process.send_after(self(), :timedout, @max_timeout)
+  defp await_results(tasks, opts) do
+    timeout = opts[:timeout] || @max_timeout
+    timer = Process.send_after(self(), :timeout, timeout)
     results = await_result(tasks, [], timer)
     cleanup(timer)
     results
@@ -28,25 +34,24 @@ defmodule Masdb.Node.DistantSupervisor do
   defp await_result([], results, _), do: results
   defp await_result(tasks, results, timer_ref) do
     receive do
-      {:timeout, ^timer_ref} ->
-        IO.inspect :timeout
-        {:timeout, results}
+      :timeout ->
+        results
 
       # Task termination, can be caused by normal termination or crash
-      {:DOWN, ref, _, pid, reason} when reason != :normal ->
-        case Masdb.Helper.find_task_by_ref(tasks, ref) do
+      {:DOWN, ref, _, _, reason} when reason != :normal ->
+        case find_task_by_ref(tasks, ref) do
           nil ->
             await_result(tasks, results, timer_ref)
-          _ ->
-            await_result(List.delete(tasks, pid), results, timer_ref)
+          {_, task} ->
+            await_result(List.delete(tasks, task), results, timer_ref)
         end
 
       {ref, result} ->
-        case Masdb.Helper.find_task_by_ref(tasks, ref) do
+        case find_task_by_ref(tasks, ref) do
           nil ->
             await_result(tasks, results, timer_ref)
-          task ->
-            await_result(List.delete(tasks, task), [result | results], timer_ref)
+          {node, task} ->
+            await_result(List.delete(tasks, task), [{node, result} | results], timer_ref)
         end
 
       _ ->
