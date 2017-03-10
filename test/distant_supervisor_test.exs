@@ -4,10 +4,10 @@ defmodule DistantSupervisorTest do
 
   test "get_process_for_nodes fetches pids" do
     assert query_remote_node(
-      [Node.self()],
+      [Node.self(), Node.self()],
       Masdb.Node.DistantSupervisor,
       :get_local_pid_fn,
       [Masdb.Node]
-    ) == Process.whereis(Masdb.Node)
+    ) == [Process.whereis(Masdb.Node), Process.whereis(Masdb.Node)]
   end
 end
