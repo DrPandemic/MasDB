@@ -1,5 +1,19 @@
 defmodule Masdb.Node.Communication do
   def select_quorum(nodes) do
-    Enum.take_random(nodes, Integer.floor_div(length(nodes), 2) + 1)
+    Enum.take_random(nodes, quorum_size(length(nodes)))
+  end
+
+  def quorum_size(0), do: 0
+  def quorum_size(size) do
+    Integer.floor_div(size, 2) + 1
+  end
+
+  def has_quorum?([], []), do: true
+  def has_quorum?(_, []), do: false
+  def has_quorum?(nodes, answers) when length(nodes) < length(answers), do: false
+  def has_quorum?(nodes, answers) do
+    answers
+    |> Enum.reduce(0, fn (a, acc) -> if a == :ok, do: acc + 1, else: acc end)
+    >= quorum_size(length(nodes))
   end
 end
