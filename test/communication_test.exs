@@ -31,16 +31,16 @@ defmodule CommunicationTest do
 
   test "has_quorum? works" do
     assert has_quorum?([], [])
-    refute has_quorum?([], [:ok])
+    refute has_quorum?([], ["foo": :ok])
     refute has_quorum?([1], [])
-    assert has_quorum?([1], [:ok])
-    refute has_quorum?([1], [:not_ok])
-    assert has_quorum?([1, 2], [:ok, :ok])
-    refute has_quorum?([1, 2], [:ok])
-    refute has_quorum?([1, 2], [:ok, :not_ok])
-    refute has_quorum?([1, 2], [:ok, :ok, :ok])
-    assert has_quorum?([1, 2, 3], [:ok, :ok, :ok])
-    assert has_quorum?([1, 2, 3], [:ok, :ok])
-    refute has_quorum?([1, 2, 3], [:ok])
+    assert has_quorum?([1], ["foo": :ok])
+    refute has_quorum?([1], ["foo": :not_ok])
+    assert has_quorum?([1, 2], ["foo": :ok,"bar": :ok])
+    refute has_quorum?([1, 2], ["foo": :ok])
+    refute has_quorum?([1, 2], ["foo": :ok,"bar": :not_ok])
+    refute has_quorum?([1, 2], ["foo": :ok,"bar": :ok,"baz": :ok])
+    assert has_quorum?([1, 2, 3], ["foo": :ok,"bar": :ok,"baz": :ok])
+    assert has_quorum?([1, 2, 3], ["foo": :ok,"bar": :ok])
+    refute has_quorum?([1, 2, 3], ["foo": :ok])
   end
 end
