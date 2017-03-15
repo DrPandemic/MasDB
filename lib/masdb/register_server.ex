@@ -41,7 +41,8 @@ defmodule Masdb.Register.Server do
       GenServer.reply(from, :ok)
       {:noreply, %Masdb.Register{state | schemas: [schema | state.schemas]}}
     else
-      {:reply, :did_not_receive_quorum, state}
+      GenServer.reply(from, :did_not_receive_quorum)
+      {:noreply, state}
     end
   end
 
