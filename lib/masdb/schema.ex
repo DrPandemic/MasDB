@@ -9,10 +9,11 @@ defmodule Masdb.Schema do
   @type t :: %Masdb.Schema{
     name: String.t,
     columns: list(Masdb.Schema.Column.t),
-    replication_factor: integer
+    replication_factor: integer,
+    creation_time: Masdb.Timestamp.t
   }
   @enforce_keys [:name, :replication_factor]
-  defstruct [:name, :replication_factor, columns: []]
+  defstruct [:name, :replication_factor, columns: [], creation_time: Masdb.Timestamp.get_timestamp()]
 
   def validate(%Masdb.Schema{replication_factor: f}) when f < 0 do
     :replication_factor_limits
@@ -20,5 +21,9 @@ defmodule Masdb.Schema do
 
   def validate(%Masdb.Schema{}) do
     :ok
+  end
+
+  def update_timestamp(%Masdb.Schema{} = schema) do
+    %{schema | creation_time: Masdb.Timestamp.get_timestamp}
   end
 end
