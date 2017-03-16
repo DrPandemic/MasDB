@@ -37,6 +37,16 @@ defmodule Masdb.Register.Server do
     end
   end
 
+  def handle_cast({:received_add_schema, schema, nodes, answers, from}, state) do
+    if Masdb.Node.Communication.has_quorum?(nodes, answers) do
+      GenServer.reply(from, :ok)
+      {:noreply, %Masdb.Register{state | schemas: [schema | state.schemas]}}
+    else
+      GenServer.reply(from, :did_not_receive_quorum)
+      {:noreply, state}
+    end
+  end
+
   def handle_call({:remote_add_schema, schema}, _, state) do
     case Masdb.Register.validate_new_schema(state.schemas, schema) do
       :ok -> {:reply, :ok, %Masdb.Register{state | schemas: [schema | state.schemas]}}
