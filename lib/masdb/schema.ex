@@ -19,18 +19,18 @@ defmodule Masdb.Schema do
   end
   
   def validate(%Masdb.Schema{} = schema) do
-    validate_hasPk(schema.columns)
+    validate_has_pk(schema.columns)
   end
   
-  def validate_hasPk([%Masdb.Schema.Column{is_pk: true} | _]) do
-	:ok
+  defp validate_has_pk([%Masdb.Schema.Column{is_pk: true} | _]) do
+    :ok
   end
   
-  def validate_hasPk([%Masdb.Schema.Column{is_pk: false} | tail]) do
-	validate_hasPk(tail)
+  defp validate_has_pk([%Masdb.Schema.Column{is_pk: false} | tail]) do
+    validate_has_pk(tail)
   end
   
-  def validate_hasPk([]) do
-	:primary_key_is_needed
+  defp validate_has_pk([]) do
+    :primary_key_is_needed
   end
 end
