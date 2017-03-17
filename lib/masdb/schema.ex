@@ -15,26 +15,26 @@ defmodule Masdb.Schema do
   @enforce_keys [:name, :replication_factor]
   defstruct [:name, :replication_factor, columns: [], creation_time: Masdb.Timestamp.get_timestamp()]
 
+  def update_timestamp(%Masdb.Schema{} = schema) do
+    %{schema | creation_time: Masdb.Timestamp.get_timestamp}
+  end
+
   def validate(%Masdb.Schema{replication_factor: f}) when f < 0 do
     :replication_factor_limits
   end
-  
+
   def validate(%Masdb.Schema{} = schema) do
     validate_has_pk(schema.columns)
   end
-  
+
   defp validate_has_pk([%Masdb.Schema.Column{is_pk: true} | _]) do
     :ok
   end
 
-  def update_timestamp(%Masdb.Schema{} = schema) do
-    %{schema | creation_time: Masdb.Timestamp.get_timestamp}
-  end
-  
   defp validate_has_pk([%Masdb.Schema.Column{is_pk: false} | tail]) do
     validate_has_pk(tail)
   end
-  
+
   defp validate_has_pk([]) do
     :primary_key_is_needed
   end
