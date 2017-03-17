@@ -23,6 +23,7 @@ defmodule Masdb.Register.Server do
 
   # private
   def handle_call({:add_schema, schema}, from, state) do
+    schema = Masdb.Schema.update_timestamp(schema)
     case Masdb.Register.validate_new_schema(state.schemas, schema) do
       :ok ->
         spawn fn ->
@@ -55,5 +56,15 @@ defmodule Masdb.Register.Server do
 
   def handle_call(:get_schemas, _, %{schemas: schemas} = state) do
     {:reply, schemas, state}
+  end
+
+  def handle_cast({:received_add_schema, schema, nodes, answers, from}, state) do
+    if Masdb.Node.Communication.has_quorum?(nodes, answers) do
+      GenServer.reply(from, :ok)
+      {:noreply, %Masdb.Register{state | schemas: [schema | state.schemas]}}
+    else
+      GenServer.reply(from, :did_not_receive_quorum)
+      {:noreply, state}
+    end
   end
 end

@@ -48,16 +48,24 @@ defmodule Masdb.Register do
 
   def validate_new_schema(schemas, new_schema) do
     pipe_matching {schemas, new_schema}, :ok,
-      :ok |> validate_schema |> validate_name
+      :ok |> validate_schema |> validate_name_or_age
   end
 
   defp validate_schema({_, %Masdb.Schema{} = new_schema}) do
     Masdb.Schema.validate(new_schema)
   end
 
-  defp validate_name({schemas, %Masdb.Schema{name: name}}) do
-    validate_name(Enum.map(schemas, &(&1.name)), name)
+  defp validate_name_or_age({schemas, %Masdb.Schema{name: name} = schema}) do
+    case validate_name(Enum.map(schemas, &(&1.name)), name) do
+      :ok -> :ok
+      error ->
+        case validate_age(schemas, schema) do
+          :ok -> :ok
+          _ -> error
+        end
+    end
   end
+
   defp validate_name([], _) do
     :ok
   end
@@ -66,5 +74,17 @@ defmodule Masdb.Register do
   end
   defp validate_name([_ | tail], new_schema_name) do
     validate_name(tail, new_schema_name)
+  end
+
+  defp validate_age(schemas, schema) do
+    case Enum.find(schemas, fn s -> s.name == schema.name end) do
+      nil -> :notfound
+      s ->
+        if s.creation_time > schema.creation_time do
+          :ok
+        else
+          :newer
+        end
+    end
   end
 end

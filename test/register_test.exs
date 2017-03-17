@@ -22,4 +22,15 @@ defmodule ResgisterTest do
       %Masdb.Schema{name: "foo", replication_factor: -1}
     ) != :ok
   end
+
+  test "tests that an older schema could overwrite a schema" do
+    d0 = Masdb.Timestamp.get_timestamp()
+    Process.sleep 1
+    d1 = Masdb.Timestamp.get_timestamp()
+
+    assert validate_new_schema(
+      [%Masdb.Schema{name: "foo", replication_factor: 1, creation_time: d1, columns: [%Masdb.Schema.Column{is_pk: true,  name: "c1", type: :int}]}],
+      %Masdb.Schema{name: "foo", replication_factor: 1, creation_time: d0, columns: [%Masdb.Schema.Column{is_pk: true,  name: "c1", type: :int}]}
+    ) == :ok
+  end
 end
