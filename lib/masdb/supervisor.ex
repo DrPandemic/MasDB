@@ -10,7 +10,8 @@ defmodule Masdb.Supervisor do
       worker(Masdb.Node, []),
       worker(Masdb.Node.DistantSupervisor, []),
       worker(Masdb.Register.Server, []),
-      worker(Masdb.Gossip.Supervisor, [])
+      worker(Masdb.Gossip.Supervisor, []),
+      worker(Masdb.Gossip.Server, [])
     ], strategy: :one_for_one)
   end
 end
