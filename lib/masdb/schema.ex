@@ -1,7 +1,7 @@
 defmodule Masdb.Schema.Column do
-  @type t :: %Masdb.Schema.Column{name: String.t, type: String.t, is_pk: boolean}
+  @type t :: %Masdb.Schema.Column{name: String.t, type: String.t, is_pk: boolean, nullable: boolean}
   @enforce_keys [:name, :type]
-  defstruct [:name, :type, is_pk: false]
+  defstruct [:name, :type, is_pk: false, nullable: false]
 end
 
 defmodule Masdb.Schema do
@@ -18,12 +18,24 @@ defmodule Masdb.Schema do
   def validate(%Masdb.Schema{replication_factor: f}) when f < 0 do
     :replication_factor_limits
   end
-
-  def validate(%Masdb.Schema{}) do
+  
+  def validate(%Masdb.Schema{} = schema) do
+    validate_has_pk(schema.columns)
+  end
+  
+  defp validate_has_pk([%Masdb.Schema.Column{is_pk: true} | _]) do
     :ok
   end
 
   def update_timestamp(%Masdb.Schema{} = schema) do
     %{schema | creation_time: Masdb.Timestamp.get_timestamp}
+  end
+  
+  defp validate_has_pk([%Masdb.Schema.Column{is_pk: false} | tail]) do
+    validate_has_pk(tail)
+  end
+  
+  defp validate_has_pk([]) do
+    :primary_key_is_needed
   end
 end
