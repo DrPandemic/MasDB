@@ -21,6 +21,14 @@ defmodule Masdb.Register.Server do
     GenServer.call(__MODULE__, :get_schemas)
   end
 
+  def get_state do
+    GenServer.call(__MODULE__, :get_state)
+  end
+
+  def received_gossip(gossip) do
+    GenServer.cast(__MODULE__, {:gossip, gossip})
+  end
+
   # private
   def handle_cast({:received_add_schema, schema, nodes, answers, from}, state) do
     if Masdb.Node.Communication.has_quorum?(nodes, answers) do
@@ -30,6 +38,10 @@ defmodule Masdb.Register.Server do
       GenServer.reply(from, :did_not_receive_quorum)
       {:noreply, state}
     end
+  end
+
+  def handle_cast({:gossip, %Masdb.Register{schemas: schemas}}, state) do
+    {:noreply, %Masdb.Register{state | schemas: Masdb.Register.merge_schemas(state.schemas, schemas)}}
   end
 
   def handle_call({:add_schema, schema}, from, state) do
@@ -56,5 +68,9 @@ defmodule Masdb.Register.Server do
 
   def handle_call(:get_schemas, _, %{schemas: schemas} = state) do
     {:reply, schemas, state}
+  end
+
+  def handle_call(:get_state, _, state) do
+    {:reply, state, state}
   end
 end

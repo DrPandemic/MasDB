@@ -1,6 +1,11 @@
 defmodule Masdb.Gossip.Server do
   use GenServer
   @timeout 1_000
+  @gossip_size 2
+
+  def received_gossip(gossip) do
+    Masdb.Register.Server.received_gossip(gossip)
+  end
 
   def start_link(name \\ __MODULE__) do
     GenServer.start_link(name, [])
@@ -12,8 +17,18 @@ defmodule Masdb.Gossip.Server do
   end
 
   def handle_info(:tick, state) do
+    gossip()
     schedule_work()
     {:noreply, state}
+  end
+
+  defp gossip do
+    Masdb.Node.DistantSupervisor.query_remote_node(
+      Enum.take_random(Masdb.Node.Connection.list(), @gossip_size),
+      Masdb.Gossip.Server,
+      :received_gossip,
+      [Masdb.Register.Server.get_state()]
+    )
   end
 
   defp schedule_work do
