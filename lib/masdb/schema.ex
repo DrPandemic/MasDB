@@ -38,4 +38,8 @@ defmodule Masdb.Schema do
   defp validate_has_pk([]) do
     :primary_key_is_needed
   end
+
+  def sort(schemas) do
+    Enum.sort_by(schemas, fn s -> s.name end)
+  end
 end

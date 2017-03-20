@@ -46,6 +46,18 @@ defmodule Masdb.Register do
   }
   defstruct [stores: [], schemas: [], tables: []]
 
+  def merge_schemas(olds, news) do
+    olds ++ news
+    |> Enum.group_by(fn s -> s.name end)
+    |> Enum.to_list
+    |> choose_schemas([])
+  end
+  defp choose_schemas([], acc), do: Masdb.Schema.sort(acc)
+  defp choose_schemas([{_, schemas}|tail], acc) do
+    schema = Enum.min_by(schemas, fn s -> {s.creation_time, s} end)
+    choose_schemas(tail, [schema | acc])
+  end
+
   def validate_new_schema(schemas, new_schema) do
     pipe_matching {schemas, new_schema}, :ok,
       :ok |> validate_schema |> validate_name_or_age
