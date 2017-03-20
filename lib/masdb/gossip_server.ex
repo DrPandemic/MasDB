@@ -1,7 +1,5 @@
 defmodule Masdb.Gossip.Server do
   use GenServer
-  @timeout 1_000
-  @gossip_size 2
 
   def received_gossip(gossip) do
     Masdb.Register.Server.received_gossip(gossip)
@@ -24,7 +22,7 @@ defmodule Masdb.Gossip.Server do
 
   defp gossip do
     Masdb.Node.DistantSupervisor.query_remote_node(
-      Enum.take_random(Masdb.Node.Connection.list(), @gossip_size),
+      Enum.take_random(Masdb.Node.Connection.list(), Application.get_env(:masdb, :"gossip_size")),
       Masdb.Gossip.Server,
       :received_gossip,
       [Masdb.Register.Server.get_state()]
@@ -32,6 +30,6 @@ defmodule Masdb.Gossip.Server do
   end
 
   defp schedule_work do
-    Process.send_after(self(), :tick, @timeout)
+    Process.send_after(self(), :tick, Application.get_env(:masdb, :"gossip_interval"))
   end
 end
