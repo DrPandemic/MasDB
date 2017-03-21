@@ -1,39 +1,39 @@
 defmodule Masdb.Register.Server do
   use GenServer
 
-  def start_link do
-    GenServer.start_link(__MODULE__, %Masdb.Register{}, name: __MODULE__)
+  def start_link(name \\ __MODULE__) do
+    GenServer.start_link(__MODULE__, %Masdb.Register{}, name: name)
   end
 
-  def add_schema(%Masdb.Schema{} = schema) do
-    GenServer.call(__MODULE__, {:add_schema, schema})
+  def add_schema(%Masdb.Schema{} = schema, name \\ __MODULE__) do
+    GenServer.call(name, {:add_schema, schema})
   end
 
-  def received_add_schema(%Masdb.Schema{} = schema, nodes, answers, from) do
-    GenServer.cast(__MODULE__, {:received_add_schema, schema, nodes, answers, from})
+  def received_add_schema(%Masdb.Schema{} = schema, nodes, answers, from, name \\ __MODULE__) do
+    GenServer.cast(name, {:received_add_schema, schema, nodes, answers, from})
   end
 
-  def remote_add_schema(%Masdb.Schema{} = schema) do
-    GenServer.call(__MODULE__, {:remote_add_schema, schema})
+  def remote_add_schema(%Masdb.Schema{} = schema, name \\ __MODULE__) do
+    GenServer.call(name, {:remote_add_schema, schema})
   end
 
-  def get_schemas do
-    GenServer.call(__MODULE__, :get_schemas)
+  def get_schemas(name \\ __MODULE__) do
+    GenServer.call(name, :get_schemas)
   end
 
-  def get_state do
-    GenServer.call(__MODULE__, :get_state)
+  def get_state(name \\ __MODULE__) do
+    GenServer.call(name, :get_state)
   end
 
-  def received_gossip(gossip) do
-    GenServer.cast(__MODULE__, {:gossip, gossip})
+  def received_gossip(gossip, name \\ __MODULE__) do
+    GenServer.cast(name, {:gossip, gossip})
   end
 
   # private
   def handle_cast({:received_add_schema, schema, nodes, answers, from}, state) do
     if Masdb.Node.Communication.has_quorum?(nodes, answers) do
       GenServer.reply(from, :ok)
-      {:noreply, %Masdb.Register{state | schemas: [schema | state.schemas]}}
+      {:noreply, %Masdb.Register{state | schemas: Masdb.Schema.sort([schema | state.schemas])}}
     else
       GenServer.reply(from, :did_not_receive_quorum)
       {:noreply, state}
@@ -61,7 +61,7 @@ defmodule Masdb.Register.Server do
 
   def handle_call({:remote_add_schema, schema}, _, state) do
     case Masdb.Register.validate_new_schema(state.schemas, schema) do
-      :ok -> {:reply, :ok, %Masdb.Register{state | schemas: [schema | state.schemas]}}
+      :ok -> {:reply, :ok, %Masdb.Register{state | schemas: Masdb.Schema.sort([schema | state.schemas])}}
       error -> {:reply, error, state}
     end
   end
