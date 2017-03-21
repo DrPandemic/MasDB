@@ -11,7 +11,10 @@ use Mix.Config
 config :masdb,
   save_file: System.get_env("SAVE_FILE") || "./data.db",
   node_name: System.get_env("NODE_NAME") || "masdb@127.0.0.1",
-  node_to_join: System.get_env("NODE_TO_JOIN")
+  node_to_join: System.get_env("NODE_TO_JOIN"),
+  distant_task_timeout: 1_000,
+  gossip_interval: 2_000,
+  gossip_size: 2
 
 # You can configure for your application as:
 #

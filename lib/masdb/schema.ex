@@ -16,7 +16,7 @@ defmodule Masdb.Schema do
   defstruct [:name, :replication_factor, columns: [], creation_time: Masdb.Timestamp.get_timestamp()]
 
   def update_timestamp(%Masdb.Schema{} = schema) do
-    %{schema | creation_time: Masdb.Timestamp.get_timestamp}
+    %Masdb.Schema{schema | creation_time: Masdb.Timestamp.get_timestamp}
   end
 
   def validate(%Masdb.Schema{replication_factor: f}) when f < 0 do
