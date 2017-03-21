@@ -4,6 +4,6 @@ defmodule Masdb.Application do
   def start(_, _) do
     Port.open({:spawn, "epmd"}, [])
 
-    {:ok, _} = Masdb.Node.Supervisor.start_link
+    {:ok, _} = Masdb.Supervisor.start_link
   end
 end

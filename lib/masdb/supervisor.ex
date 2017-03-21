@@ -1,4 +1,4 @@
-defmodule Masdb.Node.Supervisor do
+defmodule Masdb.Supervisor do
   use Supervisor
 
   def start_link do
@@ -9,7 +9,8 @@ defmodule Masdb.Node.Supervisor do
     supervise([
       worker(Masdb.Node, []),
       worker(Masdb.Node.DistantSupervisor, []),
-      worker(Masdb.Register.Server, [])
+      worker(Masdb.Register.Server, []),
+      worker(Masdb.Gossip.Server, [])
     ], strategy: :one_for_one)
   end
 end

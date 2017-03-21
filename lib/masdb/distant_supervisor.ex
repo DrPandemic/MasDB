@@ -1,6 +1,4 @@
 defmodule Masdb.Node.DistantSupervisor do
-  @max_timeout 1_000
-
   def start_link do
     Task.Supervisor.start_link(name: Masdb.Node.DistantSupervisor)
   end
@@ -24,7 +22,7 @@ defmodule Masdb.Node.DistantSupervisor do
   end
 
   defp await_results(tasks, opts) do
-    timeout = opts[:timeout] || @max_timeout
+    timeout = opts[:timeout] || Application.get_env(:masdb, :"distant_task_timeout")
     timer = Process.send_after(self(), :timeout, timeout)
     results = await_result(tasks, [], timer)
     cleanup(timer)
