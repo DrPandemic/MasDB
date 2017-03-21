@@ -49,7 +49,7 @@ defmodule Masdb.Register.Server do
     case Masdb.Register.validate_new_schema(state.schemas, schema) do
       :ok ->
         spawn fn ->
-          nodes = Masdb.Node.Connection.list()
+          nodes = Masdb.Node.list()
           a = Masdb.Node.DistantSupervisor.query_remote_node(nodes, Masdb.Register.Server, :remote_add_schema, [schema])
           Masdb.Register.Server.received_add_schema(schema, nodes, a, from)
         end

@@ -22,7 +22,7 @@ defmodule Masdb.Gossip.Server do
 
   defp gossip do
     Masdb.Node.DistantSupervisor.query_remote_node(
-      Enum.take_random(Masdb.Node.Connection.list(), Application.get_env(:masdb, :"gossip_size")),
+      Enum.take_random(Masdb.Node.list(), Application.get_env(:masdb, :"gossip_size")),
       Masdb.Gossip.Server,
       :received_gossip,
       [Masdb.Register.Server.get_state()]
