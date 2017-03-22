@@ -21,7 +21,7 @@ defmodule Masdb.Gossip.Server do
   end
 
   defp gossip do
-    if Masdb.Node.is_synced? do
+    if Masdb.Register.Server.is_synced? do
       Masdb.Node.DistantSupervisor.query_remote_node(
         Enum.take_random(Masdb.Node.list(), Application.get_env(:masdb, :"gossip_size")),
         Masdb.Gossip.Server,

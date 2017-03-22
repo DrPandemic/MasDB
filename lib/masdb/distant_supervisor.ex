@@ -12,7 +12,6 @@ defmodule Masdb.Node.DistantSupervisor do
   end
 
   def query_remote_node_until(nodes, module, fun, params, min, answers \\ [], opts \\ [])
-
   def query_remote_node_until(_, _, _, _, min, answers, _)
   when length(answers) >= min do
     answers
