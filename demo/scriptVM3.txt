@@ -1,0 +1,36 @@
+MASDB3
+--------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+source .env
+
+iex --cookie NXKNQHHHUPLJYRMTNESR --erl "+C multi_time_warp +c true" -S mix 
+
+Masdb.Register.Server.get_schemas
+
+Masdb.Register.Server.add_schema(%Masdb.Schema{name: "AutreSchema", replication_factor: 2, columns: [%Masdb.Schema.Column{name: "id", is_pk: true, type: "integer"}, %Masdb.Schema.Column{name: "nom", is_pk: false, type: "string"}, %Masdb.Schema.Column{name: "prenom", is_pk: false, type: "string"}]})
+
+Masdb.Register.Server.get_schemas
+
+
+
+
+

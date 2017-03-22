@@ -1,0 +1,35 @@
+MASDB2
+--------------------
+
+
+
+
+source .env
+
+iex --cookie NXKNQHHHUPLJYRMTNESR --erl "+C multi_time_warp +c true" -S mix 
+
+
+
+Masdb.Register.Server.get_schemas
+
+
+
+
+
+Masdb.Register.Server.get_schemas
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Masdb.Register.Server.get_schemas
