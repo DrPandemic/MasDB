@@ -43,6 +43,13 @@ defmodule CommunicationTest do
     assert length(rest3) == 2
     assert nodes3 != rest3
   end
+  test "select_with_rest can be asked for more than it has" do
+    node0 = :a
+
+    {nodes0, rest0} = select_with_rest([node0], 2)
+    assert length(nodes0) == 1
+    assert length(rest0) == 0
+  end
 
   test "quorum_size works" do
     assert quorum_size(0) == 0

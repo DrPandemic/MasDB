@@ -11,7 +11,25 @@ defmodule Masdb.Node.DistantSupervisor do
     Enum.find(tasks, fn t -> elem(t, 1).ref == ref end)
   end
 
-  def query_remote_node_until(nodes, module, fun, params, min, opts \\ []) do
+  def query_remote_node_until(nodes, module, fun, params, min, answers \\ [], opts \\ [])
+
+  def query_remote_node_until(_, _, _, _, min, answers, _)
+  when length(answers) >= min do
+    answers
+  end
+
+  def query_remote_node_until(nodes, _, _, _, min, answers, _)
+  when length(nodes) + length(answers) < min do
+    :not_enough_nodes
+  end
+
+  def query_remote_node_until(nodes, module, fun, params, min, _, opts) do
+    {nodes, rest} = Masdb.Node.Communication.select_with_rest(nodes, min)
+    answers =
+      Enum.map(nodes, &spawn_query(&1, module, fun, params))
+      |> await_results(opts)
+
+    query_remote_node_until(rest, module, fun, params, min, opts, answers)
   end
 
   def query_remote_node(nodes, module, fun, params, opts \\ []) do
