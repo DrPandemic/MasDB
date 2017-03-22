@@ -60,9 +60,13 @@ defmodule Masdb.Register.Server do
   end
 
   def handle_call({:remote_add_schema, schema}, _, state) do
-    case Masdb.Register.validate_new_schema(state.schemas, schema) do
-      :ok -> {:reply, :ok, %Masdb.Register{state | schemas: Masdb.Schema.sort([schema | state.schemas])}}
-      error -> {:reply, error, state}
+    if Masdb.Node.is_synced?() do
+      case Masdb.Register.validate_new_schema(state.schemas, schema) do
+        :ok -> {:reply, :ok, %Masdb.Register{state | schemas: Masdb.Schema.sort([schema | state.schemas])}}
+        error -> {:reply, error, state}
+      end
+    else
+      {:reply, :not_synced, state}
     end
   end
 

@@ -11,6 +11,9 @@ defmodule Masdb.Node.DistantSupervisor do
     Enum.find(tasks, fn t -> elem(t, 1).ref == ref end)
   end
 
+  def query_remote_node_until(nodes, module, fun, params, min, opts \\ []) do
+  end
+
   def query_remote_node(nodes, module, fun, params, opts \\ []) do
     nodes
     |> Enum.map(&spawn_query(&1, module, fun, params))
