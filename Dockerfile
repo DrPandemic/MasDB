@@ -18,6 +18,7 @@ ENV APP $APP
 
 RUN mkdir -p /$APP
 COPY $APP_PATH /$APP
+RUN epmd -daemon
 
 WORKDIR /$APP
 

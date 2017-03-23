@@ -1,4 +1,6 @@
 #!/bin/sh
-
-docker build -t buildhelper.app -f Dockerfile.build --build-arg APP=masdb .
-docker run -v /var/run/docker.sock:/var/run/docker.sock buildhelper.app docker build -t build.app -f Dockerfile --build-arg APP=masdb --build-arg VERSION=0.1.0 .
+docker build -t masdb.buildapp -f Dockerfile.build --build-arg APP=masdb .
+docker create --name "VM-MasDB-Build" --rm -i masdb.buildapp
+docker start VM-MasDB-Build
+docker cp VM-MasDB-Build:/build/_build ./_build
+docker stop VM-MasDB-Build
