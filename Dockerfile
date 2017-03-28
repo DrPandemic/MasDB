@@ -9,7 +9,7 @@ RUN apk — update upgrade && \
  rm -rf /var/cache/apk/*
 
 ARG APP
-ARG VERSION
+ARG MODE=foreground
 
 ENV MIX_ENV prod
 ENV PORT 4000
@@ -23,4 +23,8 @@ WORKDIR /$APP
 
 EXPOSE $PORT
 
-CMD trap exit TERM; bin/$APP foreground & wait
+RUN echo "NXKNQHHHUPLJYRMTNESR" > /root/.erlang.cookie
+RUN chmod 600 /root/.erlang.cookie
+RUN epmd -daemon
+
+CMD trap exit TERM; bin/$APP $MODE & wait
