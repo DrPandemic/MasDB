@@ -29,7 +29,7 @@ defmodule DataMapTest do
     assert res.next_id == 1
     
     assert restuple.id == expected_id
-    assert restuple.timestamp > timestamp
+    assert restuple.since_ts > timestamp
     assert restuple.value == inserted_value
   end
 end

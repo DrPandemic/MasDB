@@ -6,10 +6,10 @@ defmodule Masdb.Data.Tuple do
   
   @type t :: %Masdb.Data.Tuple{
     id: id,
-    timestamp: time,
+    since_ts: time,
     value: value,
     last_value: opened_id
   }
-  @enforce_keys [:id, :timestamp, :value]
-  defstruct [:id, :timestamp, :value, last_value: nil]
+  @enforce_keys [:id, :since_ts, :value]
+  defstruct [:id, :since_ts, :value, last_value: nil]
 end

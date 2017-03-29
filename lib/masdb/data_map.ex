@@ -29,7 +29,7 @@ defmodule Masdb.Data.Map do
   defp insert_into_map(map, schema, column, value, timestamp) do
     Map.put_new(map, get_id(map, schema, column), %Masdb.Data.Tuple{
                                                     id: get_id(map, schema, column),
-                                                    timestamp: timestamp,
+                                                    since_ts: timestamp,
                                                     value: value
                                                   })
   end
