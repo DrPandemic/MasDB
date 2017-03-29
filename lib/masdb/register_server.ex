@@ -86,8 +86,13 @@ defmodule Masdb.Register.Server do
         this = self()
         spawn fn ->
           nodes = Masdb.Node.list()
-          a = Masdb.Node.DistantSupervisor.query_remote_node(nodes, Masdb.Register.Server, :remote_add_schema, [schema])
-          Masdb.Register.Server.received_add_schema(schema, nodes, a, from, this)
+          answers = Masdb.Node.DistantSupervisor.query_remote_nodes(
+            nodes,
+            Masdb.Register.Server,
+            :remote_add_schema,
+            [schema]
+          )
+          Masdb.Register.Server.received_add_schema(schema, nodes, answers, from, this)
         end
         {:noreply, state}
 
