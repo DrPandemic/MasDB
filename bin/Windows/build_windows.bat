@@ -1,9 +1,6 @@
 @echo off
-REM Kill and delete the VM-MasDB machine, recreates it and start it again
+REM Creates the masdb.app images inside a builder.app container
 cd ../../
-docker kill VM-MasDB
-docker rm VM-MasDB
-docker build -t masdb.app -f Dockerfile.build --build-arg APP=masdb .
-docker create --name "VM-MasDB" --rm -i masdb.app
-docker start VM-MasDB
-docker exec -d VM-MasDB epmd -daemon
+docker build -t builder.app -f Dockerfile.build --build-arg APP=app .
+docker run --rm -v /var/run/docker.sock:/var/run/docker.sock builder.app docker build -t masdb.app -f Dockerfile --build-arg APP=masdb --build-arg MODE=foreground .
+docker run --rm -v /var/run/docker.sock:/var/run/docker.sock builder.app docker build -t masdb-console.app -f Dockerfile --build-arg APP=masdb --build-arg MODE=console .
