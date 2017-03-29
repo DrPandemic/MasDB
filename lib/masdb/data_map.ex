@@ -14,27 +14,27 @@ defmodule Masdb.Data.Map do
   @enforce_keys [:node_id, :last_update_time]
   defstruct [:node_id, :last_update_time, last_sync_time: nil, map: %{}, next_id: 0]
 
-  def put_new(map, schema, column, value) do
+  def put_new(map, value) do
     timestamp = Masdb.Timestamp.get_timestamp()
 
     %Masdb.Data.Map{
       node_id: map.node_id,
       last_update_time: timestamp,
       last_sync_time: map.last_sync_time,
-      map: insert_into_map(map, schema, column, value, timestamp),
+      map: insert_into_map(map, value, timestamp),
       next_id: map.next_id + 1
     }
   end
 
-  defp insert_into_map(map, schema, column, value, timestamp) do
-    Map.put_new(map, get_id(map, schema, column), %Masdb.Data.Tuple{
-                                                    id: get_id(map, schema, column),
-                                                    since_ts: timestamp,
-                                                    value: value
-                                                  })
+  defp insert_into_map(map, value, timestamp) do
+    Map.put_new(map, get_id(map), %Masdb.Data.Tuple{
+                                                      id: get_id(map),
+                                                      since_ts: timestamp,
+                                                      value: value
+                                                    })
   end
 
-  defp get_id(map, schema, column) do
-    map.node_id <> schema <> column <> to_string(map.next_id)
+  defp get_id(map) do
+    map.node_id <> to_string(map.next_id)
   end
 end
