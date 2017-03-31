@@ -6,6 +6,10 @@ defmodule Masdb.Register.Server do
     GenServer.start_link(__MODULE__, %Masdb.Register{}, name: name)
   end
 
+  def initial_add_schemas(schemas, name \\ __MODULE__) do
+    GenServer.call(name, {:initial_add_schemas, schemas})
+  end
+
   def add_schema(%Masdb.Schema{} = schema, name \\ __MODULE__) do
     GenServer.call(name, {:add_schema, schema})
   end
@@ -40,12 +44,20 @@ defmodule Masdb.Register.Server do
   end
 
   # private
+  def handle_call({:initial_add_schemas, schemas}, _, state) do
+    {:reply, :ok, %Masdb.Register{state| schemas: schemas, synced: true}}
+  end
+
   def handle_call(:get_schemas, _, %{schemas: schemas} = state) do
     {:reply, schemas, state}
   end
 
   def handle_call(:force_become_synced, _, state) do
     {:reply, :ok, %Masdb.Register{state | synced: true}}
+  end
+
+  def handle_call(:is_synced, _, state) do
+    {:reply, state.synced, state}
   end
 
   def handle_call(params, from, state) do
@@ -64,7 +76,7 @@ defmodule Masdb.Register.Server do
     if state.synced do
       handle_synced_cast(params, state)
     else
-      Logger.error "The register server received a cast before being synced. " <> inspect(params)
+      Logger.debug "The register server received a cast before being synced. " <> inspect(params)
       {:noreply, state}
     end
   end
@@ -109,9 +121,5 @@ defmodule Masdb.Register.Server do
 
   def handle_synced_call(:get_state, _, state) do
     {:reply, state, state}
-  end
-
-  def handle_synced_call(:is_synced, _, state) do
-    {:reply, state.is_synced, state}
   end
 end
