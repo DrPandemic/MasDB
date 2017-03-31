@@ -1,0 +1,22 @@
+Script de présentation
+------------------------
+startVM1
+startVM2
+startVM3
+
+Sur la vm1: Load les configuration
+Sur la vm1: Ouvrir le noeud
+Sur la vm2: Load les configuration
+Sur la vm2: Ouvrir le noeud
+Sur la vm1: Montrer qu'il n'y a pas de schema
+Sur la vm2: Montrer qu'il n'y a pas de schema
+Sur la vm1: Ajouter un schema
+Sur la vm1: Montrer que le schema est présent
+Sur la vm2: Montrer que le schema est présent aussi sur le noeud 2
+Sur la vm3: Load les configuration
+Sur la vm3: Ouvrir le noeud
+Sur la vm3: Montrer que le schema est présent dès l'ouverture du noeud
+Sur la vm3: Ajouter un schema
+Sur la vm3: Montrer que les deux schémas sont présents
+Sur la vm1: Montrer que les deux schémas sont présents
+Sur la vm2: Montrer que les deux schémas sont présents
