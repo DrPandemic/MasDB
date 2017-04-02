@@ -27,6 +27,10 @@ defmodule Masdb.Schema do
     validate_has_pk(schema.columns)
   end
 
+  defp validate_has_pk([%Masdb.Schema.Column{is_pk: true, nullable: true} | _]) do
+    :pk_cannot_be_nullable
+  end
+
   defp validate_has_pk([%Masdb.Schema.Column{is_pk: true} | _]) do
     :ok
   end
