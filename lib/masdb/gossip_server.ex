@@ -21,12 +21,14 @@ defmodule Masdb.Gossip.Server do
   end
 
   defp gossip do
-    Masdb.Node.DistantSupervisor.query_remote_node(
-      Enum.take_random(Masdb.Node.Connection.list(), Application.get_env(:masdb, :"gossip_size")),
-      Masdb.Gossip.Server,
-      :received_gossip,
-      [Masdb.Register.Server.get_state()]
-    )
+    if Masdb.Register.Server.is_synced? do
+      Masdb.Node.DistantSupervisor.query_remote_nodes(
+        Enum.take_random(Masdb.Node.list(), Application.get_env(:masdb, :"gossip_size")),
+        Masdb.Gossip.Server,
+        :received_gossip,
+        [Masdb.Register.Server.get_state()]
+      )
+    end
   end
 
   defp schedule_work do

@@ -20,13 +20,22 @@ defmodule Masdb.Node do
     GenServer.call(__MODULE__, {:connect, node_name})
   end
 
-  def handle_call({:start, node_name}, _, _) do
+  def list do
+    GenServer.call(__MODULE__, :list)
+  end
+
+  # Private
+  def handle_call({:start, node_name}, _, state) do
     Masdb.Node.Connection.start(node_name)
-    {:reply, :ok, %{node_name: node_name}}
+    {:reply, :ok, %{state | node_name: node_name}}
   end
 
   def handle_call({:connect, node_name}, _, state) do
     Masdb.Node.Connection.connect(node_name)
     {:reply, :ok, state}
+  end
+
+  def handle_call(:list, _, state) do
+    {:reply, Masdb.Node.Connection.list(), state}
   end
 end

@@ -16,6 +16,10 @@ config :masdb,
   gossip_interval: 2_000,
   gossip_size: 2
 
+config :logger,
+  backends: [:console],
+  compile_time_purge_level: :info
+
 # You can configure for your application as:
 #
 #     config :masdb, key: :value

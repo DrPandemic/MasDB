@@ -3,6 +3,17 @@ defmodule Masdb.Node.Communication do
     Enum.take_random(nodes, size || quorum_size(length(nodes)))
   end
 
+  def select_with_rest(nodes, size) do
+    selected = select_quorum(nodes, size)
+    {selected, remove_all(nodes, selected)}
+  end
+
+  defp remove_all(nodes, selected) do
+    Enum.reject(nodes, fn n ->
+      Enum.find(selected, &(&1 == n))
+    end)
+  end
+
   def quorum_size(0), do: 0
   def quorum_size(size) do
     Integer.floor_div(size, 2) + 1
