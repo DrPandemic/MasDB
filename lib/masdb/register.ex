@@ -42,9 +42,10 @@ defmodule Masdb.Register do
   @type t :: %Masdb.Register{
     stores: list(Masdb.Register.Store.t),
     schemas: list(Masdb.Schema.t),
-    tables: list(Masdb.Register.Table.t)
+    tables: list(Masdb.Register.Table.t),
+    synced: boolean
   }
-  defstruct [stores: [], schemas: [], tables: []]
+  defstruct [stores: [], schemas: [], tables: [], synced: false]
 
   def merge_schemas(olds, news) do
     olds ++ news

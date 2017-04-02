@@ -10,6 +10,10 @@ defmodule DistantSupervisorTest do
     raise "boom"
   end
 
+  def foo do
+    :bar
+  end
+
   test "find_task_by_id works on empty list" do
     assert find_task_by_ref([], make_ref()) == nil
   end
@@ -32,7 +36,7 @@ defmodule DistantSupervisorTest do
   end
 
   test "get_process_for_nodes fetches pids" do
-    assert query_remote_node(
+    assert query_remote_nodes(
       [Node.self(), Node.self()],
       Masdb.Node.DistantSupervisor,
       :get_local_pid_fn,
@@ -42,7 +46,7 @@ defmodule DistantSupervisorTest do
   end
 
   test "get_process_for_nodes stops after the timeout" do
-    assert length(query_remote_node(
+    assert length(query_remote_nodes(
           [Node.self(), Node.self(), Node.self(), Node.self(), Node.self()],
           __MODULE__,
           :sleep_random,
@@ -52,7 +56,7 @@ defmodule DistantSupervisorTest do
   end
 
   test "get_process_for_nodes can return an empty array" do
-    assert query_remote_node(
+    assert query_remote_nodes(
       [Node.self(), Node.self(), Node.self(), Node.self(), Node.self()],
       __MODULE__,
       :sleep_random,
@@ -63,11 +67,61 @@ defmodule DistantSupervisorTest do
 
   @tag :capture_log
   test "get_process_for_nodes can have crashed tasks" do
-    assert query_remote_node(
+    assert query_remote_nodes(
       [Node.self()],
       __MODULE__,
       :boom,
       []
     ) == []
+  end
+
+  test "query_remote_nodes_until returns an error if to many responses are asked" do
+    opts = [
+      timeout: 10,
+      fetch_fn: fn(_, _, _, _, _) -> [] end
+    ]
+
+    assert query_remote_nodes_until([], __MODULE__, :foo, [], 1, [], opts) == :not_enough_nodes
+  end
+
+  test "query_remote_nodes_until returns when enough answers are fetched" do
+    opts = [
+      timeout: 10,
+      fetch_fn: fn(_, _, _, _, _) -> [foo: "yup", bar: "yes"] end
+    ]
+
+    {:ok, answers} = query_remote_nodes_until([:foo, :bar, :baz], __MODULE__, :foo, [], 2, [], opts)
+
+    assert length(answers) == 2
+  end
+
+  test "query_remote_nodes_until returns when enough answers are fetched with multiple calls on fetch_fun" do
+    opts = [
+      timeout: 10,
+      fetch_fn: fn(nodes, _, _, _, _) ->
+        case nodes do
+          [a] -> [{a, "wow"}]
+          [a, _] -> [{a, "yup"}]
+        end
+      end
+    ]
+
+    {:ok, answers} = query_remote_nodes_until([:foo, :bar, :baz], __MODULE__, :foo, [], 2, [], opts)
+
+    assert length(answers) == 2
+  end
+
+  test "query_remote_nodes_until returns an error after many calls not returning enough answers" do
+    opts = [
+      timeout: 10,
+      fetch_fn: fn(nodes, _, _, _, _) ->
+        case nodes do
+          [_] -> []
+          [a, _] -> [{a, "yup"}]
+        end
+      end
+    ]
+
+    assert query_remote_nodes_until([:foo, :bar, :baz], __MODULE__, :foo, [], 2, [], opts) == :not_enough_nodes
   end
 end
