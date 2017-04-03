@@ -15,7 +15,7 @@ defmodule Masdb.Schema do
   @enforce_keys [:name, :replication_factor]
   defstruct [:name, :replication_factor, columns: [], creation_time: Masdb.Timestamp.get_timestamp()]
 
-  def get_pk(%Masdb.Schema{columns: cols}) do
+  def get_pks(%Masdb.Schema{columns: cols}) do
     Enum.filter_map(cols, fn(c) -> c.is_pk end, &(&1.name))
   end
 

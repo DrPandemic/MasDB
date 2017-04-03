@@ -50,7 +50,7 @@ defmodule Masdb.Data.Map do
     timestamp = Masdb.Timestamp.get_timestamp()
     row_id = n_id <> to_string(timestamp.unique_integer)
     old_rows = Map.get(old_map, schema.name, %Masdb.Data.Table{}).rows
-    pks = Masdb.Schema.get_pk(schema)
+    pks = Masdb.Schema.get_pks(schema)
     non_nullables = Masdb.Schema.get_non_nullables(schema)
 
     {row_id, pipe_matching({:ok, _},

@@ -18,7 +18,8 @@ defmodule DataMapTest do
       map: %{"foo" => %Masdb.Data.Table{}}
     }
 
-    {_, {:cannot_insert_empty_row, _}} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
+    {_, {flag, _}} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
+    assert flag == :cannot_insert_empty_row
   end
 
   test "Inserting nonexistent row must fail" do
@@ -38,7 +39,8 @@ defmodule DataMapTest do
       map: %{"foo" => %Masdb.Data.Table{}}
     }
 
-    {_, {:col_doesnt_exists, _}} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
+    {_, {flag, _}} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
+    assert flag == :col_doesnt_exists
   end
 
   test "Inserting duplicate pk in datamap must fail" do
@@ -64,7 +66,8 @@ defmodule DataMapTest do
                                                         }}}}}
     }
 
-    {_, {:duplicate_pk, _}} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
+    {_, {flag, _}} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
+    assert flag == :duplicate_pk
   end
 
   test "Inserting half duplicate pk in datamap must work" do
@@ -91,7 +94,8 @@ defmodule DataMapTest do
                                                         }}}}}
     }
 
-    {_, {:ok, _}} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
+    {_, {flag, _}} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
+    assert flag == :ok
   end
 
   test "Inserting element with non nullable not referenced must fail" do
@@ -111,7 +115,8 @@ defmodule DataMapTest do
       map: %{"foo" => %Masdb.Data.Table{}}
     }
 
-    {_, {:non_nullable_not_referenced, _}} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
+    {_, {flag, _}} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
+    assert flag == :non_nullable_not_referenced
   end
 
   test "Inserting element in datamap must work" do
@@ -131,7 +136,9 @@ defmodule DataMapTest do
       map: %{"foo" => %Masdb.Data.Table{}}
     }
 
-    {newKey, {:ok, new_data_map}} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
+    {newKey, {flag, new_data_map}} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
+    assert flag == :ok
+
     new_table = Map.fetch!(new_data_map.map, "foo")
     new_row = Map.fetch!(new_table.rows, newKey)
 
@@ -169,14 +176,18 @@ defmodule DataMapTest do
       map: %{"foo" => %Masdb.Data.Table{}}
     }
 
-    {newKey, {:ok, new_data_map}} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
+    {newKey, {flag, new_data_map}} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
+    assert flag == :ok
+
     new_table = Map.fetch!(new_data_map.map, "foo")
     new_row = Map.fetch!(new_table.rows, newKey)
 
     c1 = Map.fetch!(new_row.columns, "c1")
-    :error = Map.fetch(new_row.columns, "c2")
+    c2 = Map.fetch(new_row.columns, "c2")
     c3 = Map.fetch!(new_row.columns, "c3")
 
+    assert c2 == :error
+    
     assert new_data_map.last_update_time > timestamp
     assert new_data_map.last_sync_time == timestamp
     
