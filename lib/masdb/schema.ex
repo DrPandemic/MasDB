@@ -19,6 +19,10 @@ defmodule Masdb.Schema do
     Enum.filter_map(cols, fn(c) -> c.is_pk end, &(&1.name))
   end
 
+  def get_non_nullables(%Masdb.Schema{columns: cols}) do
+    Enum.filter_map(cols, fn(c) -> c.nullable == false end, &(&1.name))
+  end
+
   def update_timestamp(%Masdb.Schema{} = schema) do
     %Masdb.Schema{schema | creation_time: Masdb.Timestamp.get_timestamp}
   end

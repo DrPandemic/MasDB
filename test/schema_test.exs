@@ -20,6 +20,15 @@ defmodule SchemaTest do
     assert Masdb.Schema.get_pk(schema) == ["c1", "c2"]
   end
 
+  test "get_non_nullables returns non nullable cols" do
+    c1 = %Masdb.Schema.Column{is_pk: true,  name: "c1", type: :int}
+    c2 = %Masdb.Schema.Column{is_pk: false, name: "c2", type: :int}
+    c3 = %Masdb.Schema.Column{is_pk: false, name: "c3", type: :int, nullable: true}
+
+    schema = %Masdb.Schema{name: "foo", replication_factor: 0, columns: [c1, c2, c3]}
+    assert Masdb.Schema.get_non_nullables(schema) == ["c1", "c2"]
+  end
+
   test "tests replication_factory limits" do
     assert validate(%Masdb.Schema{name: "foo", replication_factor: -1}) == :replication_factor_limits
   end
