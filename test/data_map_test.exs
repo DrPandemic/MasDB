@@ -1,7 +1,7 @@
 defmodule DataMapTest do
   use PowerAssert
 
-  test "Insert empty row must fail" do
+  test "Inserting empty row must fail" do
     c1 = %Masdb.Schema.Column{is_pk: true,  name: "c1", type: :int}
     c2 = %Masdb.Schema.Column{is_pk: false, name: "c2", type: :int}
     c3 = %Masdb.Schema.Column{is_pk: false, name: "c3", type: :int}
@@ -21,7 +21,7 @@ defmodule DataMapTest do
     {_, {:cannot_insert_empty_row, _}} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
   end
 
-  test "Insert invalid row must fail" do
+  test "Inserting nonexistent row must fail" do
     c1 = %Masdb.Schema.Column{is_pk: true,  name: "c1", type: :int}
     c2 = %Masdb.Schema.Column{is_pk: false, name: "c2", type: :int}
     c3 = %Masdb.Schema.Column{is_pk: false, name: "c3", type: :int}
@@ -41,7 +41,7 @@ defmodule DataMapTest do
     {_, {:col_doesnt_exists, _}} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
   end
 
-  test "Insert duplicate pk in datamap must fail" do
+  test "Inserting duplicate pk in datamap must fail" do
     c1 = %Masdb.Schema.Column{is_pk: true,  name: "c1", type: :int}
     c2 = %Masdb.Schema.Column{is_pk: false, name: "c2", type: :int}
     c3 = %Masdb.Schema.Column{is_pk: false, name: "c3", type: :int}
@@ -67,7 +67,34 @@ defmodule DataMapTest do
     {_, {:duplicate_pk, _}} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
   end
 
-  test "Insert element with non nullable not referenced must fail" do
+  test "Inserting half duplicate pk in datamap must work" do
+    c1 = %Masdb.Schema.Column{is_pk: true,  name: "c1", type: :int}
+    c2 = %Masdb.Schema.Column{is_pk: true, name: "c2", type: :int}
+    c3 = %Masdb.Schema.Column{is_pk: false, name: "c3", type: :int}
+
+    timestamp = Masdb.Timestamp.get_timestamp()
+    inserted_value = %{"c1" => "val1", "c2" => "val2", "c3" => "val3"}
+    inserted_schema = %Masdb.Schema{name: "foo", replication_factor: 0, columns: [c1, c2, c3]}
+    inserted_nodeid = "foo@127.0.0.1"
+
+    duplicated_row_id = inserted_nodeid <> to_string(timestamp.unique_integer)
+
+    map = %Masdb.Data.Map{
+      node_id: inserted_nodeid,
+      last_update_time: timestamp,
+      last_sync_time: timestamp,
+      map: %{"foo" => %Masdb.Data.Table {
+                        rows: %{duplicated_row_id => %Masdb.Data.Row{
+                                                        columns: %{
+                                                          "c1" => [%Masdb.Data.Val{since_ts: timestamp, value: "val1"}],
+                                                          "c2" => [%Masdb.Data.Val{since_ts: timestamp, value: "val1"}]
+                                                        }}}}}
+    }
+
+    {_, {:ok, _}} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
+  end
+
+  test "Inserting element with non nullable not referenced must fail" do
     c1 = %Masdb.Schema.Column{is_pk: true,  name: "c1", type: :int}
     c2 = %Masdb.Schema.Column{is_pk: false, name: "c2", type: :int}
     c3 = %Masdb.Schema.Column{is_pk: false, name: "c3", type: :int}
@@ -87,7 +114,7 @@ defmodule DataMapTest do
     {_, {:non_nullable_not_referenced, _}} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
   end
 
-  test "Insert element in datamap" do
+  test "Inserting element in datamap must work" do
     c1 = %Masdb.Schema.Column{is_pk: true,  name: "c1", type: :int}
     c2 = %Masdb.Schema.Column{is_pk: false, name: "c2", type: :int}
     c3 = %Masdb.Schema.Column{is_pk: false, name: "c3", type: :int}
@@ -125,7 +152,7 @@ defmodule DataMapTest do
     assert c3.value == "val3"
   end
 
-  test "Insert incomplete row in datamap" do
+  test "Inserting incomplete row in datamap must work" do
     c1 = %Masdb.Schema.Column{is_pk: true,  name: "c1", type: :int}
     c2 = %Masdb.Schema.Column{is_pk: false, name: "c2", type: :int, nullable: true}
     c3 = %Masdb.Schema.Column{is_pk: false, name: "c3", type: :int}

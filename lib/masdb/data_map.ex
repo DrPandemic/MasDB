@@ -74,15 +74,11 @@ defmodule Masdb.Data.Map do
     values
   end
 
-  defp validate_nullable_referenced({:ok, values}, [nn_nullable | other_nn_nullables]) do
+  defp validate_nullable_referenced({:ok, values}, [nn_nullable | tail]) do
     case Map.get(values, nn_nullable) do
       nil -> {:non_nullable_not_referenced, values}
-        _ -> validate_nullable_referenced({:ok, values}, other_nn_nullables)
+        _ -> validate_nullable_referenced({:ok, values}, tail)
     end
-  end
-
-  defp validate_pk_uniqueness({:ok, values}, %Masdb.Data.Table{}, _) do
-    values
   end
 
   defp validate_pk_uniqueness({:ok, values}, rows, pks) do
@@ -107,7 +103,7 @@ defmodule Masdb.Data.Map do
                             &(%Masdb.Data.Table{rows: Map.put_new(&1.rows, row_id, row)}))
     }}
   end
-  
+
   defp validate_col_exists([], _) do
     :ok
   end
@@ -119,13 +115,12 @@ defmodule Masdb.Data.Map do
     end
   end
 
-
   defp row_has_same_pk?(_, _, []) do
-    false
+    true
   end
 
   defp row_has_same_pk?(%Masdb.Data.Row{columns: columns} = row, values, [pk | other_pks]) do
-    List.first(Map.get(columns, pk)).value == Map.get(values, pk) || row_has_same_pk?(row, values, other_pks)
+    List.first(Map.get(columns, pk)).value == Map.get(values, pk) && row_has_same_pk?(row, values, other_pks)
   end
 
   defp normalize_to_vals(values, [], _) do
@@ -133,8 +128,7 @@ defmodule Masdb.Data.Map do
   end
 
   defp normalize_to_vals(values, [key | keys], timestamp) do
-      normalize_to_vals(Map.update!(values, key, &(%Masdb.Data.Val{
-                                                    since_ts: timestamp,
-                                                    value: &1})), keys, timestamp)
+      Map.update!(values, key, &(%Masdb.Data.Val{since_ts: timestamp, value: &1}))
+        |> normalize_to_vals(keys, timestamp)
   end
 end

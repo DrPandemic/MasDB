@@ -2,7 +2,7 @@ defmodule SchemaTest do
   use PowerAssert
   import Masdb.Schema
 
-  test "get_pk works when single column pk" do
+  test "get_pk works with single column pk" do
     c1 = %Masdb.Schema.Column{is_pk: true,  name: "c1", type: :int}
     c2 = %Masdb.Schema.Column{is_pk: false, name: "c2", type: :int}
     c3 = %Masdb.Schema.Column{is_pk: false, name: "c3", type: :int}
