@@ -43,7 +43,7 @@ defmodule SchemaTest do
     assert validate(%Masdb.Schema{name: "foo", replication_factor: 1, columns: [c2, c3]})     == :primary_key_is_needed
   end
 
-  test "tests can't be nullable" do
+  test "pks can't be nullable" do
     c1 = %Masdb.Schema.Column{is_pk: true,  name: "c1", type: :int, nullable: true}
     assert validate(%Masdb.Schema{name: "foo", replication_factor: 0, columns: [c1]}) == :pk_cannot_be_nullable
   end
