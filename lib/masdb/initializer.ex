@@ -1,21 +1,25 @@
 defmodule Masdb.Initializer do
+  alias Masdb.Node.DistantSupervisor
+  alias Masdb.Node.Communication
+  alias Masdb.Register
+
   def start_link do
     {:ok, spawn_link(__MODULE__, :initialize_node, [])}
   end
 
   def initialize_node do
     nodes = Masdb.Node.list()
-    {:ok, answers} = Masdb.Node.DistantSupervisor.query_remote_nodes_until(
+    {:ok, answers} = DistantSupervisor.query_remote_nodes_until(
       nodes,
-      Masdb.Register.Server,
+      Register.Server,
       :get_schemas,
       [],
-      Masdb.Node.Communication.quorum_size(length(nodes))
+      Communication.quorum_size(length(nodes))
     )
 
     schemas = merge_answers(answers)
 
-    Masdb.Register.Server.initial_add_schemas(schemas)
+    Register.Server.initial_add_schemas(schemas)
 
     :ok
   end
@@ -23,6 +27,6 @@ defmodule Masdb.Initializer do
   def merge_answers(answers, schemas \\ [])
   def merge_answers([], schemas), do: schemas
   def merge_answers([{_, schemas}|tail], new_schemas) do
-    merge_answers(tail, Masdb.Register.merge_schemas(schemas, new_schemas))
+    merge_answers(tail, Register.merge_schemas(schemas, new_schemas))
   end
 end

@@ -1,4 +1,6 @@
 defmodule Masdb.Node.DistantSupervisor do
+  alias Masdb.Node.Communication
+
   def start_link do
     Task.Supervisor.start_link(name: Masdb.Node.DistantSupervisor)
   end
@@ -26,10 +28,12 @@ defmodule Masdb.Node.DistantSupervisor do
 
   # get shit done
   def query_remote_nodes_until(nodes, module, fun, params, min, answers, opts) do
-    {nodes, rest} = Masdb.Node.Communication.select_with_rest(nodes, min)
+    {nodes, rest} = Communication.select_with_rest(nodes, min)
     fetch_fun = opts[:fetch_fn] || (fn(nodes, module, fun, params, opts) ->
-      Enum.map(nodes, &spawn_query(&1, module, fun, params))
-      |> await_results(opts) end)
+      nodes
+      |> Enum.map(&spawn_query(&1, module, fun, params))
+      |> await_results(opts)
+    end)
 
     answers = answers ++ fetch_fun.(nodes, module, fun, params, opts)
 
@@ -42,8 +46,8 @@ defmodule Masdb.Node.DistantSupervisor do
     |> await_results(opts)
   end
 
-  defp spawn_query(node, module, fun, params) do
-    {node, Task.Supervisor.async_nolink({Masdb.Node.DistantSupervisor, node}, module, fun, params)}
+  defp spawn_query(destination, module, fun, params) do
+    {node, Task.Supervisor.async_nolink({Masdb.Node.DistantSupervisor, destination}, module, fun, params)}
   end
 
   defp await_results(tasks, opts) do
@@ -73,8 +77,8 @@ defmodule Masdb.Node.DistantSupervisor do
         case find_task_by_ref(tasks, ref) do
           nil ->
             await_result(tasks, results, timer_ref)
-          {node, task} ->
-            await_result(List.delete(tasks, task), [{node, result} | results], timer_ref)
+          {sender, task} ->
+            await_result(List.delete(tasks, task), [{sender, result} | results], timer_ref)
         end
 
       _ ->

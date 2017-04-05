@@ -21,7 +21,8 @@ defmodule Masdb.Mixfile do
     [
      {:distillery, "~> 1.0"},
      {:power_assert, "~> 0.0.8", only: :test},
-     {:pipe, "~> 0.0.2"}
+     {:pipe, "~> 0.0.2"},
+     {:credo, "== 0.6.1", only: [:dev, :test]},
     ]
   end
 end

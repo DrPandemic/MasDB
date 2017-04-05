@@ -5,6 +5,8 @@ defmodule Masdb.Schema.Column do
 end
 
 defmodule Masdb.Schema do
+  alias Masdb.Timestamp
+
   # A replication_factor of 0 is considered as `everywhere`
   @type t :: %Masdb.Schema{
     name: String.t,
@@ -13,7 +15,7 @@ defmodule Masdb.Schema do
     creation_time: Masdb.Timestamp.t
   }
   @enforce_keys [:name, :replication_factor]
-  defstruct [:name, :replication_factor, columns: [], creation_time: Masdb.Timestamp.get_timestamp()]
+  defstruct [:name, :replication_factor, columns: [], creation_time: Timestamp.get_timestamp()]
 
   def get_pks(%Masdb.Schema{columns: cols}) do
     Enum.filter_map(cols, fn(c) -> c.is_pk end, &(&1.name))
@@ -24,7 +26,7 @@ defmodule Masdb.Schema do
   end
 
   def update_timestamp(%Masdb.Schema{} = schema) do
-    %Masdb.Schema{schema | creation_time: Masdb.Timestamp.get_timestamp}
+    %Masdb.Schema{schema | creation_time: Timestamp.get_timestamp}
   end
 
   def validate(%Masdb.Schema{replication_factor: f}) when f < 0 do
