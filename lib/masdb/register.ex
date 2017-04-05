@@ -36,6 +36,7 @@ end
 
 defmodule Masdb.Register do
   use Pipe
+  alias Masdb.Schema
 
   @type id :: integer
 
@@ -53,7 +54,7 @@ defmodule Masdb.Register do
     |> Enum.to_list
     |> choose_schemas([])
   end
-  defp choose_schemas([], acc), do: Masdb.Schema.sort(acc)
+  defp choose_schemas([], acc), do: Schema.sort(acc)
   defp choose_schemas([{_, schemas}|tail], acc) do
     schema = Enum.min_by(schemas, fn s -> {s.creation_time, s} end)
     choose_schemas(tail, [schema | acc])
@@ -65,7 +66,7 @@ defmodule Masdb.Register do
   end
 
   defp validate_schema({_, %Masdb.Schema{} = new_schema}) do
-    Masdb.Schema.validate(new_schema)
+    Schema.validate(new_schema)
   end
 
   defp validate_name_or_age({schemas, %Masdb.Schema{name: name} = schema}) do
