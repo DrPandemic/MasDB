@@ -47,7 +47,7 @@ defmodule Masdb.Node.DistantSupervisor do
   end
 
   defp spawn_query(destination, module, fun, params) do
-    {node, Task.Supervisor.async_nolink({Masdb.Node.DistantSupervisor, destination}, module, fun, params)}
+    {destination, Task.Supervisor.async_nolink({Masdb.Node.DistantSupervisor, destination}, module, fun, params)}
   end
 
   defp await_results(tasks, opts) do
