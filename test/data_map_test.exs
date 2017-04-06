@@ -18,7 +18,7 @@ defmodule DataMapTest do
       map: %{"foo" => %Masdb.Data.Table{}}
     }
 
-    {_, {flag, _}} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
+    {flag, _, _} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
     assert flag == :cannot_insert_empty_row
   end
 
@@ -39,7 +39,7 @@ defmodule DataMapTest do
       map: %{"foo" => %Masdb.Data.Table{}}
     }
 
-    {_, {flag, _}} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
+    {flag, _, _} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
     assert flag == :col_doesnt_exists
   end
 
@@ -66,7 +66,7 @@ defmodule DataMapTest do
                                                         }}}}}
     }
 
-    {_, {flag, _}} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
+    {flag, _, _} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
     assert flag == :duplicate_pk
   end
 
@@ -94,7 +94,7 @@ defmodule DataMapTest do
                                                         }}}}}
     }
 
-    {_, {flag, _}} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
+    {flag, _, _} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
     assert flag == :ok
   end
 
@@ -115,7 +115,7 @@ defmodule DataMapTest do
       map: %{"foo" => %Masdb.Data.Table{}}
     }
 
-    {_, {flag, _}} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
+    {flag, _, _} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
     assert flag == :non_nullable_not_referenced
   end
 
@@ -136,7 +136,7 @@ defmodule DataMapTest do
       map: %{"foo" => %Masdb.Data.Table{}}
     }
 
-    {newKey, {flag, new_data_map}} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
+    {flag, newKey, new_data_map} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
     assert flag == :ok
 
     new_table = Map.fetch!(new_data_map.map, "foo")
@@ -176,7 +176,7 @@ defmodule DataMapTest do
       map: %{"foo" => %Masdb.Data.Table{}}
     }
 
-    {newKey, {flag, new_data_map}} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
+    {flag, newKey, new_data_map} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
     assert flag == :ok
 
     new_table = Map.fetch!(new_data_map.map, "foo")
