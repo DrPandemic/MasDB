@@ -20,14 +20,29 @@ defmodule Masdb.Data.Server do
    {:ok, state}
   end
 
+  def reset(name \\ __MODULE__) do
+    GenServer.call(name, :reset)
+  end
+
   def insert(schema_name, values, name \\ __MODULE__) do
     GenServer.call(name, {:insert, schema_name, values})
   end
 
   # private
+  def handle_call(:reset, _, {register, _}) do
+    {:reply, :ok, {
+        register,
+        %Data.Map{
+          node_id: inspect(Node.self),
+          last_update_time: Timestamp.get_timestamp()
+        }
+     }
+    }
+  end
+
   def handle_call(params, from, {register, %Data.Map{}} = state) do
     # since this is blocking, it could cause issues
-    if Register.Server.is_synced?(register) do
+    if Register.Server.is_synced(register) do
       handle_synced_call(params, from, state)
     else
       {:reply, :not_synced, state}

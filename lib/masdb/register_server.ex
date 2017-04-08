@@ -12,6 +12,10 @@ defmodule Masdb.Register.Server do
     GenServer.start_link(__MODULE__, %Register{}, name: name)
   end
 
+  def reset(name \\ __MODULE__) do
+    GenServer.call(name, :reset)
+  end
+
   def initial_add_schemas(schemas, name \\ __MODULE__) do
     GenServer.call(name, {:initial_add_schemas, schemas})
   end
@@ -56,6 +60,10 @@ defmodule Masdb.Register.Server do
   # private
   def handle_call({:initial_add_schemas, schemas}, _, state) do
     {:reply, :ok, %Register{state| schemas: schemas, synced: true}}
+  end
+
+  def handle_call(:reset, _, _) do
+    {:reply, :ok, %Register{}}
   end
 
   def handle_call(:get_schemas, _, %{schemas: schemas} = state) do
