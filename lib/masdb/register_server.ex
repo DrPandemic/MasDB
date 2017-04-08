@@ -40,7 +40,7 @@ defmodule Masdb.Register.Server do
     GenServer.cast(name, {:gossip, gossip})
   end
 
-  def is_synced?(name \\ __MODULE__) do
+  def is_synced(name \\ __MODULE__) do
     GenServer.call(name, :is_synced)
   end
 
