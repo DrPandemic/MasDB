@@ -32,6 +32,10 @@ defmodule Masdb.Register.Server do
     GenServer.call(name, :get_schemas)
   end
 
+  def get_schema(schema_name, name \\ __MODULE__) do
+    GenServer.call(name, {:get_schema, schema_name})
+  end
+
   def get_state(name \\ __MODULE__) do
     GenServer.call(name, :get_state)
   end
@@ -56,6 +60,13 @@ defmodule Masdb.Register.Server do
 
   def handle_call(:get_schemas, _, %{schemas: schemas} = state) do
     {:reply, schemas, state}
+  end
+
+  def handle_call({:get_schema, schema_name}, _, %{schemas: schemas} = state) do
+    case Enum.find(schemas, &(&1.name == schema_name)) do
+      nil -> {:reply, :not_found, state}
+      schema -> {:reply, {:ok, schema}, state}
+    end
   end
 
   def handle_call(:force_become_synced, _, state) do
@@ -102,6 +113,7 @@ defmodule Masdb.Register.Server do
     case Register.validate_new_schema(state.schemas, schema) do
       :ok ->
         this = self()
+        # this could go in a supervisor
         spawn fn ->
           nodes = Masdb.Node.list()
           answers = DistantSupervisor.query_remote_nodes(

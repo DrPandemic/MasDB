@@ -8,7 +8,7 @@ defmodule Masdb.Gossip.Server do
   end
 
   def start_link(name \\ __MODULE__) do
-    GenServer.start_link(name, [])
+    GenServer.start_link(__MODULE__, [], name: name)
   end
 
   def init([]) do
