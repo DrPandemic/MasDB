@@ -27,7 +27,7 @@ defmodule Masdb.Data.Server do
   # private
   def handle_call(params, from, {register, %Data.Map{}} = state) do
     # since this is blocking, it could cause issues
-    if Register.Server.is_synced?(register) do
+    if Register.Server.is_synced(register) do
       handle_synced_call(params, from, state)
     else
       {:reply, :not_synced, state}
