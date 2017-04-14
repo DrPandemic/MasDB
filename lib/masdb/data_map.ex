@@ -1,6 +1,6 @@
 defmodule Masdb.Data.Val do
   @type time :: Masdb.Timestamp.t
-  @type value :: integer | float | boolean | String.t | :unknown
+  @type value :: integer | float | boolean | String.t | :unknown | :nil
 
   @type t :: %Masdb.Data.Val{
     since_ts: time,
@@ -62,6 +62,13 @@ defmodule Masdb.Data.Map do
       |> validate_pk_uniqueness(old_rows, pks)
       |> normalize_to_row(timestamp)
       |> put_new_row(schema.name, n_id, l_s_t, old_map, timestamp))
+  end
+
+  def select(%Masdb.Data.Map{map: data_map}, schema_name, columns, selector \\ :all) do
+    case data_map[schema_name] do
+      :nil -> :inexistent_schema
+         _ -> get_rows(columns, Map.values(data_map[schema_name].rows), selector)
+    end
   end
 
   defp validate_with_schema({:ok, row_id, values}, schema) do
@@ -133,5 +140,24 @@ defmodule Masdb.Data.Map do
     values
     |> Map.update!(key, &(%Masdb.Data.Val{since_ts: timestamp, value: &1}))
     |> normalize_to_vals(keys, timestamp)
+  end
+
+  defp get_rows(columns, data, filter, acc \\ []) 
+  defp get_rows(columns, [row | nexts], :all, acc) do
+    get_rows(columns, nexts, :all, acc ++ flatten_cols(columns, row.columns))
+  end
+
+  defp get_rows(_, [], :all, acc) do
+    acc
+  end
+
+  defp flatten_cols(columns, data, acc \\ [])
+  defp flatten_cols([row | nexts], data, acc) do
+    val = Map.get(data, row, %Masdb.Data.Val{since_ts: "", value: :nil})
+    flatten_cols(nexts, data, acc ++ [val.value])
+  end
+
+  defp flatten_cols([], _, acc) do
+    acc
   end
 end
