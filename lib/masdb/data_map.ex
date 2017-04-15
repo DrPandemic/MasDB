@@ -29,7 +29,6 @@ defmodule Masdb.Data.Table do
 end
 
 defmodule Masdb.Data.Map do
-  use Pipe
   alias Masdb.Timestamp
   alias Masdb.Schema
 
