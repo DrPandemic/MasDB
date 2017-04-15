@@ -23,6 +23,7 @@ defmodule Masdb.Mixfile do
      {:power_assert, "~> 0.0.8", only: :test},
      {:pipe, "~> 0.0.2"},
      {:credo, "== 0.6.1", only: [:dev, :test], runtime: false},
+     {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
     ]
   end
 end
