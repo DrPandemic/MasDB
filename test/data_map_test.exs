@@ -148,7 +148,7 @@ defmodule DataMapTest do
 
     assert new_data_map.last_update_time > timestamp
     assert new_data_map.last_sync_time == timestamp
-    
+
     assert c1.since_ts > timestamp
     assert c1.value == "val1"
 
@@ -187,10 +187,10 @@ defmodule DataMapTest do
     c3 = Map.fetch!(new_row.columns, "c3")
 
     assert c2 == :error
-    
+
     assert new_data_map.last_update_time > timestamp
     assert new_data_map.last_sync_time == timestamp
-    
+
     assert c1.since_ts > timestamp
     assert c1.value == "val1"
 
