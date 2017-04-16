@@ -13,6 +13,7 @@ defmodule Masdb.Node.DistantSupervisor do
     Enum.find(tasks, fn t -> elem(t, 1).ref == ref end)
   end
 
+  @spec query_remote_nodes_until([atom], atom, atom, [any], integer, keyword, keyword) :: {:ok, keyword} | atom
   def query_remote_nodes_until(nodes, module, fun, params, min, answers \\ [], opts \\ [])
   # enough responses
   def query_remote_nodes_until(_, _, _, _, min, answers, _)
