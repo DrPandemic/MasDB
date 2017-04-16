@@ -197,4 +197,96 @@ defmodule DataMapTest do
     assert c3.since_ts == c1.since_ts
     assert c3.value == "val3"
   end
+
+  test "Simple SELECT" do
+    c1 = %Masdb.Schema.Column{is_pk: true,  name: "c1", type: :int}
+    c2 = %Masdb.Schema.Column{is_pk: false, name: "c2", type: :int, nullable: true}
+    c3 = %Masdb.Schema.Column{is_pk: false, name: "c3", type: :int}
+
+    timestamp = Masdb.Timestamp.get_timestamp()
+    inserted_value = %{"c1" => 1, "c2" => 2, "c3" => 3}
+    inserted_schema = %Masdb.Schema{name: "foo", replication_factor: 0, columns: [c1, c2, c3]}
+    inserted_nodeid = "foo@127.0.0.1"
+
+    map = %Masdb.Data.Map{
+      node_id: inserted_nodeid,
+      last_update_time: timestamp,
+      last_sync_time: timestamp,
+      map: %{"foo" => %Masdb.Data.Table{}}
+    }
+
+    {flag, _, new_data_map} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
+    assert flag == :ok
+
+    assert [3,2,1] == Masdb.Data.Map.select(new_data_map, "foo", ["c1", "c2", "c3"])
+  end
+
+  test "SELECT avec valeur :nil" do
+    c1 = %Masdb.Schema.Column{is_pk: true,  name: "c1", type: :int}
+    c2 = %Masdb.Schema.Column{is_pk: false, name: "c2", type: :int, nullable: true}
+    c3 = %Masdb.Schema.Column{is_pk: false, name: "c3", type: :int}
+
+    timestamp = Masdb.Timestamp.get_timestamp()
+    inserted_value = %{"c1" => 1, "c3" => 3}
+    inserted_schema = %Masdb.Schema{name: "foo", replication_factor: 0, columns: [c1, c2, c3]}
+    inserted_nodeid = "foo@127.0.0.1"
+
+    map = %Masdb.Data.Map{
+      node_id: inserted_nodeid,
+      last_update_time: timestamp,
+      last_sync_time: timestamp,
+      map: %{"foo" => %Masdb.Data.Table{}}
+    }
+
+    {flag, _, new_data_map} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
+    assert flag == :ok
+
+    assert [3,:nil,1] == Masdb.Data.Map.select(new_data_map, "foo", ["c1", "c2", "c3"])
+  end
+
+  test "SELECT avec un schema inexistant" do
+    c1 = %Masdb.Schema.Column{is_pk: true,  name: "c1", type: :int}
+    c2 = %Masdb.Schema.Column{is_pk: false, name: "c2", type: :int, nullable: true}
+    c3 = %Masdb.Schema.Column{is_pk: false, name: "c3", type: :int}
+
+    timestamp = Masdb.Timestamp.get_timestamp()
+    inserted_value = %{"c1" => 1, "c3" => 3}
+    inserted_schema = %Masdb.Schema{name: "foo", replication_factor: 0, columns: [c1, c2, c3]}
+    inserted_nodeid = "foo@127.0.0.1"
+
+    map = %Masdb.Data.Map{
+      node_id: inserted_nodeid,
+      last_update_time: timestamp,
+      last_sync_time: timestamp,
+      map: %{"foo" => %Masdb.Data.Table{}}
+    }
+
+    {flag, _, new_data_map} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
+    assert flag == :ok
+
+    assert :inexistent_schema == Masdb.Data.Map.select(new_data_map, "bar", ["c1", "c2", "c3"])
+  end
+
+  test "SELECT avec une colonne inexistante" do
+    c1 = %Masdb.Schema.Column{is_pk: true,  name: "c1", type: :int}
+    c2 = %Masdb.Schema.Column{is_pk: false, name: "c2", type: :int, nullable: true}
+    c3 = %Masdb.Schema.Column{is_pk: false, name: "c3", type: :int}
+
+    timestamp = Masdb.Timestamp.get_timestamp()
+    inserted_value = %{"c1" => 1, "c2" => 2, "c3" => 3}
+    inserted_schema = %Masdb.Schema{name: "foo", replication_factor: 0, columns: [c1, c2, c3]}
+    inserted_nodeid = "foo@127.0.0.1"
+
+    map = %Masdb.Data.Map{
+      node_id: inserted_nodeid,
+      last_update_time: timestamp,
+      last_sync_time: timestamp,
+      map: %{"foo" => %Masdb.Data.Table{}}
+    }
+
+    {flag, _, new_data_map} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
+    assert flag == :ok
+
+    assert [:nil, 3, 2, 1] == Masdb.Data.Map.select(new_data_map, "foo", ["c1", "c2", "c3", "c4"])
+  end
 end
