@@ -198,7 +198,7 @@ defmodule DataMapTest do
     assert c3.value == "val3"
   end
 
-  test "SELECT simple" do
+  test "Simple SELECT" do
     c1 = %Masdb.Schema.Column{is_pk: true,  name: "c1", type: :int}
     c2 = %Masdb.Schema.Column{is_pk: false, name: "c2", type: :int, nullable: true}
     c3 = %Masdb.Schema.Column{is_pk: false, name: "c3", type: :int}
@@ -218,7 +218,7 @@ defmodule DataMapTest do
     {flag, _, new_data_map} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
     assert flag == :ok
 
-    assert [1,2,3] == Masdb.Data.Map.select(new_data_map, "foo", ["c1", "c2", "c3"])
+    assert [3,2,1] == Masdb.Data.Map.select(new_data_map, "foo", ["c1", "c2", "c3"])
   end
 
   test "SELECT avec valeur :nil" do
@@ -241,7 +241,7 @@ defmodule DataMapTest do
     {flag, _, new_data_map} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
     assert flag == :ok
 
-    assert [1,:nil,3] == Masdb.Data.Map.select(new_data_map, "foo", ["c1", "c2", "c3"])
+    assert [3,:nil,1] == Masdb.Data.Map.select(new_data_map, "foo", ["c1", "c2", "c3"])
   end
 
   test "SELECT avec un schema inexistant" do
@@ -287,6 +287,6 @@ defmodule DataMapTest do
     {flag, _, new_data_map} = Masdb.Data.Map.insert(map, inserted_schema, inserted_value)
     assert flag == :ok
 
-    assert [1,2,3, :nil] == Masdb.Data.Map.select(new_data_map, "foo", ["c1", "c2", "c3", "c4"])
+    assert [:nil, 3, 2, 1] == Masdb.Data.Map.select(new_data_map, "foo", ["c1", "c2", "c3", "c4"])
   end
 end
