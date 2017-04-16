@@ -134,7 +134,7 @@ defmodule Masdb.Data.Map do
 
   defp normalize_to_vals(values, [key | keys], timestamp) do
     values
-    |> Map.update!(key, &(%Masdb.Data.Val{since_ts: timestamp, value: &1}))
+    |> Map.update!(key, &([%Masdb.Data.Val{since_ts: timestamp, value: &1}]))
     |> normalize_to_vals(keys, timestamp)
   end
 
