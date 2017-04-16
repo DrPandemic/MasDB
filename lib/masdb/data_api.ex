@@ -6,7 +6,8 @@ defmodule Masdb.Data.API do
   @spec insert(String.t, map, atom, keyword) :: {:ok, integer} | atom
   def insert(schema_name, values, consistency, opts \\ [])
   def insert(schema_name, values, :quorum, opts) do
-    with {:ok, local_row_id} <- Data.Server.insert(schema_name, values, opts[:data_server]),
+    data_server = opts[:data_server] || Data.Server
+    with {:ok, local_row_id} <- Data.Server.insert(schema_name, values, data_server),
          nodes <- opts[:nodes] || Masdb.Node.list(),
          {:ok, remote_answers} <- DistantSupervisor.query_remote_nodes_until(nodes, Masdb.Data.Server, :insert,
            [schema_name, values], Communication.quorum_size(length(nodes)), [], opts),
