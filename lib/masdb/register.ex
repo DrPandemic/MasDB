@@ -35,7 +35,6 @@ defmodule Masdb.Register.Store do
 end
 
 defmodule Masdb.Register do
-  use Pipe
   alias Masdb.Schema
 
   @type id :: integer
@@ -61,15 +60,16 @@ defmodule Masdb.Register do
   end
 
   def validate_new_schema(schemas, new_schema) do
-    pipe_matching {schemas, new_schema}, :ok,
-      :ok |> validate_schema |> validate_name_or_age
+    with :ok <- validate_schema(schemas, new_schema) do
+      validate_name_or_age(schemas, new_schema)
+    end
   end
 
-  defp validate_schema({_, %Masdb.Schema{} = new_schema}) do
+  defp validate_schema(_, %Masdb.Schema{} = new_schema) do
     Schema.validate(new_schema)
   end
 
-  defp validate_name_or_age({schemas, %Masdb.Schema{name: name} = schema}) do
+  defp validate_name_or_age(schemas, %Masdb.Schema{name: name} = schema) do
     case validate_name(Enum.map(schemas, &(&1.name)), name) do
       :ok -> :ok
       error ->

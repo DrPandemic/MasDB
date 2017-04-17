@@ -29,7 +29,6 @@ defmodule Masdb.Data.Table do
 end
 
 defmodule Masdb.Data.Map do
-  use Pipe
   alias Masdb.Timestamp
   alias Masdb.Schema
 
@@ -55,13 +54,13 @@ defmodule Masdb.Data.Map do
     pks = Schema.get_pks(schema)
     non_nullables = Schema.get_non_nullables(schema)
 
-    pipe_matching({:ok, _, _},
+    with :ok <- validate_with_schema(row_id, values, schema),
+         :ok <- validate_nullable_referenced(row_id, values, non_nullables),
+         :ok <- validate_pk_uniqueness(row_id, values, old_rows, pks),
+         {:ok, values} <- normalize_to_row(row_id, values, timestamp),
+         {:ok, values} <- put_new_row(row_id, values, schema.name, n_id, l_s_t, old_map, timestamp) do
       {:ok, row_id, values}
-      |> validate_with_schema(schema)
-      |> validate_nullable_referenced(non_nullables)
-      |> validate_pk_uniqueness(old_rows, pks)
-      |> normalize_to_row(timestamp)
-      |> put_new_row(schema.name, n_id, l_s_t, old_map, timestamp))
+    end
   end
 
   def select(%Masdb.Data.Map{map: data_map}, schema_name, columns, selector \\ :all) do
@@ -71,45 +70,42 @@ defmodule Masdb.Data.Map do
     end
   end
 
-  defp validate_with_schema({:ok, row_id, values}, schema) do
+  defp validate_with_schema(row_id, values, schema) do
     keys = Map.keys(values)
     case length(keys) do
-      0 -> {:cannot_insert_empty_row, row_id, values}
-      _ -> {validate_col_exists(keys, schema), row_id, values}
+      0 -> :cannot_insert_empty_row
+      _ -> validate_col_exists(keys, schema)
     end
   end
 
-  defp validate_nullable_referenced(values, []) do
-    values
-  end
-
-  defp validate_nullable_referenced({:ok, row_id, values}, [nn_nullable | tail]) do
+  defp validate_nullable_referenced(row_id, values, []), do: :ok
+  defp validate_nullable_referenced(row_id, values, [nn_nullable | tail]) do
     case Map.get(values, nn_nullable) do
-      nil -> {:non_nullable_not_referenced, row_id, values}
-        _ -> validate_nullable_referenced({:ok, row_id, values}, tail)
+      nil -> :non_nullable_not_referenced
+        _ -> validate_nullable_referenced(row_id, values, tail)
     end
   end
 
-  defp validate_pk_uniqueness({:ok, row_id, values}, rows, pks) do
+  defp validate_pk_uniqueness(row_id, values, rows, pks) do
     case Enum.find(Map.values(rows), &(row_has_same_pk?(&1, values, pks))) do
-      nil -> {:ok, row_id, values}
-        _ -> {:duplicate_pk, row_id, values}
+      nil -> :ok
+        _ -> :duplicate_pk
     end
   end
 
-  defp normalize_to_row({:ok, row_id, values}, timestamp) do
-    {:ok, row_id, %Masdb.Data.Row{columns: normalize_to_vals(values, Map.keys(values), timestamp)}}
+  defp normalize_to_row(row_id, values, timestamp) do
+    {:ok, %Masdb.Data.Row{columns: normalize_to_vals(values, Map.keys(values), timestamp)}}
   end
 
-  defp put_new_row({:ok, row_id, row}, schema_name, node_id, last_sync_time, old_map, timestamp) do
-    {:ok, row_id, %Masdb.Data.Map{
-                    node_id: node_id,
-                    last_update_time: timestamp,
-                    last_sync_time: last_sync_time,
-                    map: Map.update(old_map,
-                                    schema_name,
-                                    %Masdb.Data.Table{rows: %{row_id => row}},
-                                    &(%Masdb.Data.Table{rows: Map.put_new(&1.rows, row_id, row)}))
+  defp put_new_row(row_id, row, schema_name, node_id, last_sync_time, old_map, timestamp) do
+    {:ok, %Masdb.Data.Map{
+        node_id: node_id,
+        last_update_time: timestamp,
+        last_sync_time: last_sync_time,
+        map: Map.update(old_map,
+          schema_name,
+          %Masdb.Data.Table{rows: %{row_id => row}},
+          &(%Masdb.Data.Table{rows: Map.put_new(&1.rows, row_id, row)}))
     }}
   end
 
