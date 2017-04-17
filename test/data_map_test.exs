@@ -203,13 +203,13 @@ defmodule DataMapTest do
   end
 
   test "Simple SELECT" do
-    c1 = %Masdb.Schema.Column{is_pk: true,  name: "c1", type: :int}
-    c2 = %Masdb.Schema.Column{is_pk: false, name: "c2", type: :int, nullable: true}
-    c3 = %Masdb.Schema.Column{is_pk: false, name: "c3", type: :int}
+    c1 = %Schema.Column{is_pk: true,  name: "c1", type: :int}
+    c2 = %Schema.Column{is_pk: false, name: "c2", type: :int, nullable: true}
+    c3 = %Schema.Column{is_pk: false, name: "c3", type: :int}
 
-    timestamp = Masdb.Timestamp.get_timestamp()
+    timestamp = Timestamp.get_timestamp()
     inserted_value = %{"c1" => 1, "c2" => 2, "c3" => 3}
-    inserted_schema = %Masdb.Schema{name: "foo", replication_factor: 0, columns: [c1, c2, c3]}
+    inserted_schema = %Schema{name: "foo", replication_factor: 0, columns: [c1, c2, c3]}
     inserted_nodeid = "foo@127.0.0.1"
 
     map = %Masdb.Data.Map{
@@ -225,14 +225,14 @@ defmodule DataMapTest do
     assert [3,2,1] == Masdb.Data.Map.select(new_data_map, "foo", ["c1", "c2", "c3"])
   end
 
-  test "SELECT avec valeur :nil" do
-    c1 = %Masdb.Schema.Column{is_pk: true,  name: "c1", type: :int}
-    c2 = %Masdb.Schema.Column{is_pk: false, name: "c2", type: :int, nullable: true}
-    c3 = %Masdb.Schema.Column{is_pk: false, name: "c3", type: :int}
+  test "SELECT with :nil" do
+    c1 = %Schema.Column{is_pk: true,  name: "c1", type: :int}
+    c2 = %Schema.Column{is_pk: false, name: "c2", type: :int, nullable: true}
+    c3 = %Schema.Column{is_pk: false, name: "c3", type: :int}
 
-    timestamp = Masdb.Timestamp.get_timestamp()
+    timestamp = Timestamp.get_timestamp()
     inserted_value = %{"c1" => 1, "c3" => 3}
-    inserted_schema = %Masdb.Schema{name: "foo", replication_factor: 0, columns: [c1, c2, c3]}
+    inserted_schema = %Schema{name: "foo", replication_factor: 0, columns: [c1, c2, c3]}
     inserted_nodeid = "foo@127.0.0.1"
 
     map = %Masdb.Data.Map{
@@ -249,13 +249,13 @@ defmodule DataMapTest do
   end
 
   test "SELECT not present schema" do
-    c1 = %Masdb.Schema.Column{is_pk: true,  name: "c1", type: :int}
-    c2 = %Masdb.Schema.Column{is_pk: false, name: "c2", type: :int, nullable: true}
-    c3 = %Masdb.Schema.Column{is_pk: false, name: "c3", type: :int}
+    c1 = %Schema.Column{is_pk: true,  name: "c1", type: :int}
+    c2 = %Schema.Column{is_pk: false, name: "c2", type: :int, nullable: true}
+    c3 = %Schema.Column{is_pk: false, name: "c3", type: :int}
 
-    timestamp = Masdb.Timestamp.get_timestamp()
+    timestamp = Timestamp.get_timestamp()
     inserted_value = %{"c1" => 1, "c3" => 3}
-    inserted_schema = %Masdb.Schema{name: "foo", replication_factor: 0, columns: [c1, c2, c3]}
+    inserted_schema = %Schema{name: "foo", replication_factor: 0, columns: [c1, c2, c3]}
     inserted_nodeid = "foo@127.0.0.1"
 
     map = %Masdb.Data.Map{
@@ -272,13 +272,13 @@ defmodule DataMapTest do
   end
 
   test "SELECT on not present column" do
-    c1 = %Masdb.Schema.Column{is_pk: true,  name: "c1", type: :int}
-    c2 = %Masdb.Schema.Column{is_pk: false, name: "c2", type: :int, nullable: true}
-    c3 = %Masdb.Schema.Column{is_pk: false, name: "c3", type: :int}
+    c1 = %Schema.Column{is_pk: true,  name: "c1", type: :int}
+    c2 = %Schema.Column{is_pk: false, name: "c2", type: :int, nullable: true}
+    c3 = %Schema.Column{is_pk: false, name: "c3", type: :int}
 
-    timestamp = Masdb.Timestamp.get_timestamp()
+    timestamp = Timestamp.get_timestamp()
     inserted_value = %{"c1" => 1, "c2" => 2, "c3" => 3}
-    inserted_schema = %Masdb.Schema{name: "foo", replication_factor: 0, columns: [c1, c2, c3]}
+    inserted_schema = %Schema{name: "foo", replication_factor: 0, columns: [c1, c2, c3]}
     inserted_nodeid = "foo@127.0.0.1"
 
     map = %Masdb.Data.Map{
@@ -294,7 +294,7 @@ defmodule DataMapTest do
     assert [:nil, 3, 2, 1] == Masdb.Data.Map.select(new_data_map, "foo", ["c1", "c2", "c3", "c4"])
   end
 
-test "can inserts multiple rows" do
+  test "can inserts multiple rows" do
     c1 = %Schema.Column{is_pk: true,  name: "c1", type: :int}
 
     timestamp = Timestamp.get_timestamp()

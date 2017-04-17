@@ -138,7 +138,7 @@ defmodule Masdb.Data.Map do
     |> normalize_to_vals(keys, timestamp)
   end
 
-  defp get_rows(columns, data, selector, acc \\ []) 
+  defp get_rows(columns, data, selector, acc \\ [])
   defp get_rows(columns, [row | nexts], :all, acc) do
     get_rows(columns, nexts, :all, acc ++ flatten_cols(columns, row.columns))
   end
@@ -149,7 +149,7 @@ defmodule Masdb.Data.Map do
 
   defp flatten_cols(columns, data, acc \\ [])
   defp flatten_cols([row | nexts], data, acc) do
-    val = Map.get(data, row, %Masdb.Data.Val{since_ts: "", value: :nil})
+    val = List.first(Map.get(data, row, [%Masdb.Data.Val{since_ts: "", value: :nil}]))
     flatten_cols(nexts, data, [val.value | acc])
   end
 
