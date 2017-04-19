@@ -20,6 +20,7 @@ defmodule Masdb.Data.Server do
    {:ok, state}
   end
 
+  @spec insert(String.t, keyword, atom) :: {:ok, integer} | atom
   def insert(schema_name, values, name \\ __MODULE__) do
     GenServer.call(name, {:insert, schema_name, values})
   end
